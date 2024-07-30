@@ -1,6 +1,6 @@
 # JavaScript 学习指南
 
-说明：本文章内容学习自https://www.bilibili.com/video/BV1Y84y1L7Nn/。
+说明：本文章内容学习自https://www.bilibili.com/video/BV1Y84y1L7Nn/ 。
 
 ## 1 JS 基础知识
 
