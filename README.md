@@ -109,6 +109,39 @@ array1.forEach((element) => console.log(element));
 // Expected output: "c"
 ```
 
+## 2.4 参数传递方式
+
+JavaScript 中所有函数传递都是按值传递的，不会按引用传递。所谓的值，就是指直接保存在变量上的值，如果把对象作为参数传递，那么这个值就是这个对象的引用，而不是对象本身。这里实际上是一个隐式的赋值过程，所以给函数传递参数时，相当于从一个变量赋值到另一个变量。JS没有指针！！！
+
+原始值：
+
+```javascript
+function add(num) {
+    return num + 1;
+}
+
+let count = 5;
+let result = add(count); // 此处参数传递的过程可以看作是 num = count
+
+console.log(count); // 5
+console.log(result); // 6
+```
+
+引用值（对象）：
+
+```javascript
+function setName(obj) {
+    obj.name = "小明";
+}
+
+let person = {};
+
+setName(person); // 此处参数传递的过程可以看作是 obj = person;
+console.log(person); // {name: "小明"}
+```
+
+好好学习上面两个例子。应该避免在方法中尝试修改原来传入参数的值。
+
 # 3 标准对象
 
 ## 3.1 RegExp
