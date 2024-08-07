@@ -109,6 +109,82 @@ array1.forEach((element) => console.log(element));
 // Expected output: "c"
 ```
 
+## 2.4 标签函数
+
+标签函数是指在模板字符串中使用的函数。例如：
+
+```javascript
+let name = '小明';
+let age = 20;
+
+function myTag(strings, name, age) {
+    console.log(strings[0]); // '这是'
+    console.log(strings[1]); // '，今年'
+    console.log(strings[2]); // '岁了'
+    console.log(name); // '小明'
+    console.log(age); // 20
+    return 'OK';
+}
+
+let sentence = myTag`这是${name}，今年${age}岁了`;
+console.log(sentence); // OK
+```
+
+标签函数的作用是对模板字符串进行处理。在这个例子中，`strings`是一个数组，它的成员是模板字符串中那些没有变量替换的部分，`name`和`age`则是模板字符串中的变量。标签函数可以对模板字符串进行处理，然后返回一个新的字符串。
+
+注意：标签函数括号使用的是反引号，而不是小括号。
+
+### 模板字符串
+
+模板字符串是一种特殊的字符串，它可以定义多行字符串，也可以在字符串中插入变量。模板字符串使用反引号（`）标识。
+
+```javascript
+let name = '小明';
+let age = 20;
+let sentence = `你好，${name}，你今年${age}岁了！`;
+console.log(sentence); // 你好，小明，你今年20岁了！
+```
+
+## 2.5 箭头函数
+
+**要特别区分箭头函数和普通函数的`this`指向问题。** 箭头函数的`this`指向定义时的`this`，而不是调用时的`this`。
+
+```javascript
+let obj = {
+    birth: 1990,
+    getAge: function () {
+        let b = this.birth; // 1990
+        let fn = () => new Date().getFullYear() - this.birth; // this指向obj对象
+        return fn();
+    }
+};
+
+console.log(obj.getAge()); // 30
+```
+
+在箭头函数中，`this`总是指向词法作用域，也就是外层调用者`obj`。这种特性非常有利于封装回调函数。
+
+```javascript
+let obj = {
+    birth: 1990,
+    getAge: function (year) {
+        let b = this.birth; // 1990
+        let fn = (y) => y - this.birth; // this指向obj对象
+        return fn.call({birth: 2000}, year);
+    }
+};
+
+console.log(obj.getAge(2015)); // 25
+```
+
+在这个例子中，`fn`内部的`this`指向`obj`对象，而`fn.call({birth: 2000}, year)`的`this`指向`birth: 2000`的对象，但是由于箭头函数的`this`总是指向词法作用域，所以`this.birth`仍然指向`obj`对象的`birth`属性。
+
+## 2.6 闭包
+
+## 2.7 生成器
+
+
+
 # 3 标准对象
 
 ## 3.1 RegExp
