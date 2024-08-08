@@ -298,3 +298,8 @@ re2.test('ABC-001'); // true
 
 其中，`Array.prototype`定义了很多方法，可以直接在对象上调用这些方法。比如`indexOf()` `pop()` 这一类数组方法。
 
+## 4.2 对象原型 原型对象
+
+![prototype](imgs/prototype.png)
+
+`__proto__` 是对象的原型，它指向原型对象`prototype`。`实例对象.__proto__.constructor`指向实例对象的构造函数。它们的关系如上图。
