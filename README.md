@@ -303,3 +303,40 @@ re2.test('ABC-001'); // true
 ![prototype](imgs/prototype.png)
 
 `__proto__` 是对象的原型，它指向原型对象`prototype`。`实例对象.__proto__.constructor`指向实例对象的构造函数。它们的关系如上图。
+
+## 4.3 原型继承
+
+请看下面的代码。
+
+```javascript
+// Person 类，构造函数，它实际上就是声明一个对象（类），new出来的对象结构一样，但是对象不一样
+function Person() {
+    this.eyes = 2
+    this.head = 1
+}
+
+// Woman 类
+function Woman(){
+
+}
+
+// Woman 通过原型来继承Person
+Woman.prototype = new Person()
+// 如果这样子定义, Woman的构造函数就会不对
+// 需要指回原来的构造函数
+Woman.prototype.constructor = Woman
+
+// 给女人添加一个方法——生孩子
+Woman.prototype.baby = function(){
+    console.log('宝贝')
+}
+
+const red = new Woman()
+console.log(red)
+
+function Man(){
+
+}
+Man.prototype = new Person()
+Man.prototype.constructor = Man
+```
