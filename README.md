@@ -1,3 +1,179 @@
+# 2024.8.20
+
+# 1 Promise/async/await
+
+JS是一门单线程的编程语言，它的所有程序都运行在同一个线程中。**好处就是它能减少线程内存开销以及线程切换开销。**
+
+Promise是一种处理异步代码，而不会陷入回调地狱的方式。**它解决了前端程序员的“回调地狱”问题。**
+
+# 视频: https://www.bilibili.com/video/BV1454y1R7vj?p=10
+
+视频作者: 杰哥课堂(B站)
+
+## 1.1 为什么需要Promise
+- **需求**
+  通过AJAX请求id ,再根据id请求用户名.再根据用户名,再根据用户名获取email
+- **回调地狱**
+  回调函数中嵌套回调
+  Promise解决了回调地狱
+
+## 1.2 Promise 的基本使用
+### 语法
+```javascript
+new Promise((resolve, reject) => {})
+```
+- Promise接受一个函数作为参数
+- 在参数函数中有两个参数
+  - `resolve`: 成功函数
+  - `reject`: 失败函数
+
+### Promise实例
+Promise实例有两个属性
+- `state`: 状态
+- `result`: 结果
+
+#### 1) Promise的状态
+- 第一种状态: `pending`
+- 第二种状态: `fulfilled`
+- 第三种状态: `rejected`
+
+#### 2) Promise状态的改变
+示例1
+```javascript
+const p = new Promise((resolve, reject) => {
+  resolve();
+});
+console.dir(p); // fulfilled
+```
+示例2
+```javascript
+const p = new Promise((resolve, reject) => {
+  reject();
+});
+console.dir(p);
+```
+- `resolve()`: 调用函数, 使当前Promise对象的状态改成`fulfilled`
+- `reject()`: 调用函数,使当前Promise对象状态改成`rejected`
+Promise状态的改变是一次性的
+
+#### 3) Promise 的结果
+示例
+```javascript
+const p = new Promise((resolve, reject) => {
+  resolve("成功的结果");
+});
+console.dir(p);
+```
+
+### 1.3 Promise的方法
+#### 1) then方法
+示例1
+```javascript
+const p = new Promise((resolve, reject) => {
+  reject("失败的结果");
+});
+
+p.then(() => {
+  console.log("成功的回调");
+}, () => {
+  console.log("失败时调用");
+});
+```
+示例2
+```javascript
+const p = new Promise((resolve, reject) => {
+  reject("失败的结果");
+});
+
+p.then((value) => {
+  console.log("成功的回调", value);
+}, (err) => {
+  console.log("失败时调用", err);
+});
+```
+- 在then方法的参数函数中,通过形参使用Promise对象的结果
+- `then`方法返回一个新的Promise实例,状态是`pending`
+
+#### 2) catch方法
+示例
+```javascript
+const p = new Promise((resolve, reject) => {
+  throw new Error("出错了");
+});
+
+p.catch((reason) => {
+  console.log("失败", reason);
+});
+```
+
+### 1.4 优化代码
+示例
+```javascript
+function getData(url, data = {}) {
+  return new Promise((resolve, reject) => {
+    $.ajax({
+      type: "GET",
+      url: url,
+      data: data,
+      success: function (res) {
+        resolve(res);
+      },
+      error: function (res) {
+        reject(res);
+      }
+    });
+  });
+}
+
+getData("data1.json")
+  .then((data) => {
+    const { id } = data;
+    return getData("data2.json", {id});
+  })
+  .then((data) => {
+    const { usename } = data;
+    return getData("data3.json", {usename});
+  })
+  .then((data) => {
+    console.log(data);
+  });
+```
+
+## 1.5 async和await
+- 视频链接: [async与await结合发送AJAX请求](https://www.bilibili.com/video/BV1GA411x7z1?p=46&spm_id_from=pageDriver)
+- 视频作者: 尚硅谷-李强(B站)
+
+#### 1) async 函数
+- 函数的返回值为 promise 对象
+- promise 对象的结果由 async 函数执行的返回值决定
+
+#### 2) await 表达式
+- await 右侧的表达式一般为 promise 对象, 但也可以是其它的值
+- 如果表达式是 promise 对象, await 返回的是 promise 成功的值
+- 如果表达式是其它值, 直接将此值作为 await 的返回值
+
+#### 3) async和await结合
+示例
+```javascript
+const fs = require("fs");
+const util = require("util");
+const mineReadFile = util.promisify(fs.readFile);
+
+async function main() {
+  try {
+    let data1 = await mineReadFile("./resource/1.html");
+    let data2 = await mineReadFile("./resource/2.html");
+    let data3 = await mineReadFile("./resource/3.html");
+  } catch(e) {
+    console.log(e);
+  }
+}
+```
+
+## 面试题：如何实现一个Promise？
+
+待补充。
+
 # 2024.8.19
 
 ## 1 对象与原型继承
