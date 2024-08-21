@@ -1,3 +1,154 @@
+# 2024.8.21
+ 
+## 1 async/await
+
+async和await的引入是为了可以用同步编程的方式去写异步代码。
+
+### 1.1 async
+- 函数的返回值为 promise 对象，**永远返回`Promise`**
+- promise 对象的结果由 async 函数执行的返回值决定
+
+**一个`async`简单例子：**
+
+```javascript
+async function bb(){
+  return '别bb，专心学习';
+}
+
+bb().then(value =>{
+  console.log(value);   // "别bb，专心学习"
+});
+```
+
+简单分析下，`bb()`函数返回的是一个Promise对象，因为这里我们返回一个字符串，可以默认认为是返回了一个Promise对象，这个Promise对象执行了`resolve('别bb，专心学习')`命令，是一个`fullfilled`的对象。接着第二段代码在执行的过程中就把value传了过去打印。
+
+### 1.2 await 表达式
+- await 右侧的表达式一般为 promise 对象, 但也可以是其它的值
+- 如果表达式是 promise 对象, await 返回的是 promise 成功的值
+- 如果表达式是其它值, 直接将此值作为 await 的返回值
+
+**注意：`await`不能单独使用，它一定要和`async`一起使用。**
+
+**同时，`await`与`Promise`往往一起使用，如果没搞懂不要乱用`await`。**
+
+**一个`await`的简单例子：**
+
+```javascript
+async function bb(){
+  console.log('1');
+  let two = await Promise.resolve('2');
+  console.log(two);
+  console.log('3');
+  return Promise.resolve('别bb，专心学习');
+}
+
+bb().then(value => {
+  console.log(value);
+});
+```
+
+**分析：**
+
+这段代码定义了一个异步函数 `bb`，并且在函数的最后返回了一个通过 `Promise.resolve` 封装的字符串 `'别bb，专心学习'`。下面是代码的执行流程：
+
+1. 调用异步函数 `bb`。
+2. 执行到 `console.log('1')`，输出 `'1'`。
+3. 执行 `await Promise.resolve('2')`。由于 `await` 会等待 `Promise` 完成，这里的 `Promise.resolve('2')` 会立即解决（resolved），因此 `await` 会暂停 `bb` 函数的执行，直到 `Promise` 被解决，然后变量 `two` 被赋值为 `'2'`。
+4. 继续执行，输出 `two` 的值，即 `'2'`。
+5. 再次输出 `'3'`。
+6. 函数执行到返回 `Promise.resolve('别bb，专心学习')`。这里的 `Promise` 会立即解决，但返回的是一个 `Promise` 对象。
+7. 由于 `bb` 函数是异步的，它返回的是一个 `Promise` 对象，这个 `Promise` 对象会等待 `bb` 函数内部的所有操作完成。
+8. 调用 `bb()` 后，使用 `.then()` 方法来添加一个回调函数，这个回调函数将在 `bb` 返回的 `Promise` 解决后执行。
+9. 当 `bb` 函数返回的 `Promise` 解决时，`.then()` 方法中的回调函数被调用，输出传递给 `resolve` 的值，即 `'别bb，专心学习'`。
+
+打印结果：
+
+```javascript
+"1"
+"2"
+"3"
+"别bb，专心学习"
+```
+
+### 1.3 async和await结合（这个感觉在上面这个例子中已经讲到了）
+示例
+```javascript
+const fs = require("fs");
+const util = require("util");
+const mineReadFile = util.promisify(fs.readFile);
+
+async function main() {
+  try {
+    let data1 = await mineReadFile("./resource/1.html");
+    let data2 = await mineReadFile("./resource/2.html");
+    let data3 = await mineReadFile("./resource/3.html");
+  } catch(e) {
+    console.log(e);
+  }
+}
+```
+
+## 2 深浅拷贝
+
+**二者的区别：浅拷贝是拷贝一层，属性为对象时，浅拷贝是复制，两个对象指向同一个地址 深拷贝是递归拷贝深层次，属性为对象时，深拷贝是新开栈，两个对象指向不同的地址。**
+
+**一般而言，对象存在堆中，栈中存储基本数据类型的值和某些指向堆的地址。**
+
+### 2.1 一个浅拷贝的简单例子
+
+```javascript
+let a = [1, 2, 3, [3, 4]];
+let b = [...a];
+a[3][1] = 5;
+a[1] = 6;
+console.log(a);   // [1, 6, 3, [3, 5]]
+console.log(b);   // [1, 2, 3, [3, 5]]，6是基本对象，拷贝值；[3, 4]是引用类型对象，拷贝的是[3, 4]这个数组对象的地址
+```
+
+**浅拷贝只拷贝一层，但是，如果我把代码的第二行写成：**
+
+```javascript
+let b = a;
+```
+
+这样子就不行了，这样子我打印b的时候，数组b的第二项也会变成6，因为它没有涉及拷贝的。它只复制了地址。
+
+### 2.2 深拷贝
+
+就是不管多少层都给你开栈拷贝下去。
+
+看下面一个使用`JSON.stringify()`实现深拷贝的方式：
+
+```javascript
+const obj2 = JSON.parse(JSON.stringify(obj1));
+```
+
+可以说这是最简单实现深拷贝的方式了。**但是这种方式它有一个弊端，就是它不能拷贝对象中存在函数的情况。**
+
+### 2.3 面试题：实现一个深拷贝（重要）
+
+```javascript
+function deepClone(obj, hash = new WeakMap()) {
+  if (obj === null) return obj; // 如果是null或者undefined我就不进行拷贝操作
+  if (obj instanceof Date) return new Date(obj);
+  if (obj instanceof RegExp) return new RegExp(obj);
+  // 可能是对象或者普通的值  如果是函数的话是不需要深拷贝
+  if (typeof obj !== "object") return obj;
+  // 是对象的话就要进行深拷贝
+  if (hash.get(obj)) return hash.get(obj);
+  let cloneObj = new obj.constructor();
+  // 找到的是所属类原型上的constructor,而原型上的 constructor指向的是当前类本身
+  hash.set(obj, cloneObj);
+  for (let key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      // 实现一个递归拷贝
+      cloneObj[key] = deepClone(obj[key], hash);
+    }
+  }
+  return cloneObj;
+}
+```
+
 # 2024.8.20
 
 # 1 Promise/async/await
