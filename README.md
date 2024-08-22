@@ -135,14 +135,14 @@ function deepClone(obj, hash = new WeakMap()) {
   // 可能是对象或者普通的值  如果是函数的话是不需要深拷贝
   if (typeof obj !== "object") return obj;
   // 是对象的话就要进行深拷贝
-  if (hash.get(obj)) return hash.get(obj);
+  if (hash.get(obj)) return hash.get(obj);    // 这句话是为了避免循环拷贝，如果自己引用自己的话，后面会递归拷贝下去，导致出现死循环。
   let cloneObj = new obj.constructor();
   // 找到的是所属类原型上的constructor,而原型上的 constructor指向的是当前类本身
   hash.set(obj, cloneObj);
   for (let key in obj) {
     if (obj.hasOwnProperty(key)) {
       // 实现一个递归拷贝
-      cloneObj[key] = deepClone(obj[key], hash);
+      cloneObj[key] = deepClone(obj[key], hash);    // 这里的hash传的栈的内存地址，因此添加直接添加在原来的hash上。
     }
   }
   return cloneObj;
