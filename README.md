@@ -128,6 +128,7 @@ const obj2 = JSON.parse(JSON.stringify(obj1));
 ### 2.3 面试题：实现一个深拷贝（重要）
 
 ```javascript
+// obj为待拷贝对象，hash为存储的拷贝数组，为了检查该对象是否被拷贝过。
 function deepClone(obj, hash = new WeakMap()) {
   if (obj === null) return obj; // 如果是null或者undefined我就不进行拷贝操作
   if (obj instanceof Date) return new Date(obj);
@@ -439,6 +440,41 @@ console.log(result);    // local scope
 ```
 
 问题：尝试对上面的代码分析执行上下文栈的变化？
+
+再看下面这段代码：
+
+```javascript
+var obj = {
+    value: 1,
+};
+
+function bar(o){
+    console.log(o);
+    a = 2;
+}
+
+function foo(o){
+    o = 2;
+    console.log(o);
+    // console.log(a);    // 试想一下，如果加上这句话会怎么样？
+    bar(o);
+}
+
+foo(obj);
+console.log(obj.value);
+console.log(a);
+```
+
+试着分析打印的结果。
+
+答案：
+
+```javascript
+2
+2
+1
+2
+```
 
 ### 1.2 变量对象
 
