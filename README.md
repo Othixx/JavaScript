@@ -1,10 +1,169 @@
+# 2024.8.26
+
+## 1 解构赋值
+
+# 2024.8.25
+
+## 1 JS PWA
+
+定义：
+
+一个标准的PWA程序，必须包含3个部分：
+
+1. Web App Manifest
+2. Service Worker
+3. HTTPS服务器或者http://localhost
+
+### 1.1 Web Worker
+
+Web Worker是HTML5提供的一种新的技术，允许我们在后台线程中运行脚本。这样可以避免阻塞UI线程，提高页面性能。Web Worker是运行在后台的JavaScript，独立于其他脚本，不会影响页面的性能。**它脱离于主线程之外，我们主要把一些耗时复杂的活给它干，是一个独立的运行环境，独立于主线程，但它不能用来操作DOM和BOM。它主要用来执行一些复杂的计算。**
+
+下面看一个例子：
+
+```javascript
+
+// 主线程
+var worker = new Worker('work.js');
+worker.postMessage('Hello World');
+worker.onmessage = function(event) {    // 主线程等待worker线程的消息，一旦接到了来自worker线程的消息，就会执行。是什么消息呢？就是worker线程中的postMessage()方法传递过来的消息。
+    console.log('Received message ' + event.data);
+};
+
+// work.js
+self.onmessage = function(event) {      // worker线程等待主线程的消息，一旦接到了来自主线程的消息，就会执行。是什么消息呢？就是主线程中的postMessage()方法传递过来的消息。
+    console.log('Message received in worker ' + event.data);
+    self.postMessage('Hello World');
+};
+
+```
+
+输出结果为：
+
+```javascript
+Message received in worker Hello World
+Received message Hello World
+```
+
+**注意：**worker线程中的self指的是worker线程自身。此外，除了`onmessage`外，还可以使用`addEventListener`来监听消息。
+
+### 1.2 Service Worker
+
+Service Worker是一个独立于网页的线程，可以用来实现离线缓存、消息推送等功能。它是一个浏览器背后的独立线程，一旦被安装，就可以在用户关闭网页后继续运行。它不会受到用户操作的影响，因此可以用来实现一些在后台运行的任务。**简单来说就是你的网页能在网络环境较差时继续使用。**
+
+**Service Worker是一个独立的Worker线程，独立于当前网页进程，是一种特殊的Web Worker。**
+
+看下面这个例子：（把这个例子理解了，这一部分问题就不大了）
+
+```json
+// api.json
+[
+    {"id":1, "name":"abc"},
+    {"id":2, "name":"bcd"}
+]
+```
+
+```html
+// index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <button id="btn">btn</button>
+    <button id="btn2">btn2</button>
+    <script>
+
+        (async function (){
+            var t = { id:99 };
+
+            // 注册 Service Worker
+            const registration = await navigator.serviceWorker.register('./service-worker.js');
+            console.log('Service worker registered with scope: ', registration.scope);
+
+            // 监听从serviceworker线程发送到主线程的message
+            navigator.serviceWorker.addEventListener('message', function (e) {
+                console.log('service worker传到主线程的', e.data, e); 
+                console.log(t);
+            });
+
+            // postMessage方法，从主线程发送数据到worker，注意所有的发送数据都是深拷贝，而不是共享内存。避免并发问题
+            document.getElementById('btn').addEventListener('click', function() {
+                navigator.serviceWorker.controller.postMessage(t);
+            });
+
+            document.getElementById('btn2').addEventListener('click', function() {
+                fetch('./api.json').then(res=>res.json()).then(data=>{
+                    console.log(data);
+                })
+            })
+        }) ();
+    </script>
+</body>
+</html>
+```
+
+```javascript
+// service-worker.js
+// install事件，在第一次注册的时候会触发
+//  这里在install的时候进行了初始化，是将两个资源添加到了cache中
+//  caches是浏览器内置的缓存对象，addALL会立即请求该资源并进行缓存
+self.addEventListener('install', function(event) {
+    console.log('install事件')
+    event.waitUntil(
+      caches.open('v1').then(function(cache) {
+        return cache.addAll([
+          '/fe/serviceworker/api.json'
+        ]);
+      })
+    );
+});
+
+// activate事件，在符合scope的页面打开后，就会激活，注意install只有一次，但是激活会有很多个页面激活
+//  也可以将一些初始化操作放到active中
+self.addEventListener('activate', (event) => {
+    console.log('activate事件，一般是新打开了页面', event)
+});
+
+// fetch事件，拦截fetch方法，当页面调用fetch方法，就会被拦截
+//  这里的逻辑是结合install中的缓存设置，来判断fetch的资源是否命中缓存实现加速，否则才真正调用fetch
+self.addEventListener('fetch', async (event) => {
+    console.log("拦截fetch", event);
+    const res = await caches.match(event.request.url);
+    if(res) {
+        return res;
+    } else {
+        return fetch(event.request); 
+    }
+});
+
+// 接收来自主线程的消息，并往主线程发送消息
+self.addEventListener('message', function (e) {
+    console.log('主线程传到service worker', e.data);
+    e.data.id ++;
+    setTimeout(()=>{
+        e.source.postMessage(e.data)
+    }, 5000)
+});
+```
+
+**几个要点：①生命周期要搞清楚：`install` `activate` `fetch` 它们是按照先后顺序排列的**
+
+**②无论是Web Worker 还是 Service Worker它们在父进程和子进程之间的消息传递几乎都是深拷贝。**
+
+**③`fetch`的主要作用是拦截，可以认为先访问本地资源，如果本地资源找不到再尝试请求fetch远程。**
+
+**④`event.waitUntil`这种是固定写法，至于为什么这么写，其实琢磨起来很深奥，可以看B站视频，但建议面试不要纠结这种问题。**
+
 # 2024.8.23
 
-# 1 函数式编程
+## 1 函数式编程
 
 https://segmentfault.com/a/1190000009864459#item-2
 
-## 是什么
+### 是什么
 
 函数式编程（Functional Programming，后面简称FP），维基百科的定义是：
 
@@ -12,7 +171,7 @@ https://segmentfault.com/a/1190000009864459#item-2
 
 我来尝试理解下这个定义，好像就是说，在敲代码的时候，我要把过程逻辑写成函数，定义好输入参数，只关心它的输出结果。而且可以把函数作为输入输出。感觉好像平常写js时，就是这样的嘛！
 
-## 特性
+### 特性
 
 网上FP的定义与特性琳琅满目。各种百科、博客、一些老师的网站上都有大同小异的介绍。为了方便阅读，我列下几个好像比较重要的特性，并附上我的第一眼理解。
 

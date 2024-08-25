@@ -1,0 +1,8 @@
+{
+    "name": "豆瓣APP-PWA",
+    "short_name": "豆瓣APP",
+    "start_url": "./index.html",
+    "background_color": "skyblue",
+    "theme_color": "yellow",
+    "display": "standalone"
+}
