@@ -1,6 +1,85 @@
 # 2024.8.26
 
-## 1 解构赋值
+## 1 ES6补充知识点
+
+**总的来说，ES6语法比较多而杂，有时间要细化，一遍肯定不够，要多梳理清楚。**
+
+### 1.1 解构赋值
+
+#### 1.1.1 变量交换：
+
+```javascript
+// 交换变量
+let a = 1;
+let b = 2;
+[a,b] = [b,a];
+console.log(a);   // 2
+console.log(b);   // 1
+```
+
+#### 1.1.2 对象的解构赋值：
+
+```javascript
+let {
+    title: titleOne,    // titleOne 会被赋值为字符串abc
+    test: [
+        {
+            title: titleTwo     // titleTwo 会被赋值为字符串test
+        }
+    ]
+} = {
+    title: 'abc',
+    test:[
+        {
+            title: 'test'
+        }
+    ]
+}
+```
+
+#### 1.1.3 再看下面的例子：
+
+```javascript
+// 例子一
+const obj = {
+    id: '1',
+    name: '蛋老师',
+    age: 18,
+    gender: '男',
+    email: '709394@qq.com',
+}
+
+const id = obj.id;
+const name_ = obj.name_;
+const age = obj.age;
+const gender = obj.gender;
+const email = obj.email;
+
+console.log(id, name_, age, gender, email);     // 输出obj对象的值，因为在window下的所有const声明的常量都已经被解构赋值。
+```
+
+```javascript
+// 例子二
+const obj = {
+    id: '1',
+    name: '蛋老师',
+    age: 18,
+    gender: '男',
+    email: '709394@qq.com',
+}
+const { name: name_, gender: gender_, email: email_ } = obj;
+console.log(name_, gender_, email_);    // 蛋老师 男 709394@qq.com
+```
+
+**解构赋值多常用于对象的某个属性，因为它可以直接使用对象的某个属性，而不需要通过属性访问的形式使用。**
+
+### 1.2 面试题：`var` `let` `const`的区别
+
+## 2 MVC、MVP与MVVM
+
+**划重点：**
+
+MVVM 双向数据绑定 在Angular1.x版本的时候通过的是脏值检测来处理，而现在无论是React还是Vue还是最新的Angular，其实实现方式都更相近了，那就是通过数据劫持+发布订阅模式。
 
 # 2024.8.25
 
