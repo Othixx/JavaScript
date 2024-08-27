@@ -1,3 +1,23 @@
+# 2024.8.27
+
+## 1 Vue 生命周期
+
+### 1.1 Vue 生命周期钩子函数
+
+![生命周期](./imgs/lifePeriod.png)
+
+一个Vue应用是通过new Vue()创建的。在创建这个应用的时候，Vue会在合适的时机自动调用一些钩子函数。这些钩子函数就是Vue的生命周期函数。这8个函数主要被分为4个阶段：**创建、挂载、更新、销毁**。每个阶段都包含了两个函数。**其中最重要的是`created`和`mounted`函数。**
+
+只有执行了beforeCreate之后，才会生成响应式数据，在created函数中我们可以发送初始化渲染请求，为后面Mount的渲染挂在阶段做准备。（初始化渲染请求越早越好，但是必须在数据变成响应式数据之后）。
+
+只有执行了beforeMount之后，模板才会生成。这个时候，诸如`{{count}}`这样的模板数据被渲染成功。
+
+### 1.2 Vue 的异步更新
+
+Vue的异步更新是通过`nextTick`实现的。`nextTick`是一个异步方法，它会在下次DOM更新循环结束之后执行延迟回调。**Vue在更新DOM时是异步执行的，它会把数据变化的操作放到一个队列中，只有在下一个事件循环中才会执行更新。**
+
+
+
 # 2024.8.26
 
 ## 1 ES6补充知识点
@@ -77,9 +97,53 @@ console.log(name_, gender_, email_);    // 蛋老师 男 709394@qq.com
 
 ## 2 MVC、MVP与MVVM
 
+这篇文章写得好：https://www.ruanyifeng.com/blog/2015/02/mvcmvp_mvvm.html
+
 **划重点：**
 
 MVVM 双向数据绑定 在Angular1.x版本的时候通过的是脏值检测来处理，而现在无论是React还是Vue还是最新的Angular，其实实现方式都更相近了，那就是通过数据劫持+发布订阅模式。
+
+### 2.1 MVC
+
+MVC模式的意思是，软件可以分成三个部分。
+```
+1. 视图（View）：用户界面。
+2. 控制器（Controller）：业务逻辑
+3. 模型（Model）：数据保存
+```
+
+各部分之间的通信方式如下：
+```
+1. View 传送指令到 Controller
+2. Controller 完成业务逻辑后，要求 Model 改变状态
+3. Model 将新的数据发送到 View，用户得到反馈
+```
+
+**接受用户指令时，MVC可以分成两种方式，一种时通过View接收指令，传递给Controller，另一种是直接通过Controller接受指令。**
+
+**MVC模式下，所有部分的通信都是单向的。**
+
+### 2.2 MVP
+
+MVP模式把Controller改名为Presenter，同时改变了通信方向。
+
+```
+1. 各部分之间的通信，都是双向的。
+2. View 与 Model 不发生联系，都通过 Presenter 传递。
+3. View 非常薄，不部署任何业务逻辑，称为"被动视图"（Passive View），即没有任何主动性，而 Presenter非常厚，所有逻辑都部署在那里。
+```
+
+### 2.3 MVVM
+
+MVVM 模式将 Presenter 改名为 ViewModel，基本上与 MVP 模式完全一致。
+
+**唯一的区别是，它采用双向绑定（data-binding）：View的变动，自动反映在 ViewModel，反之亦然。Angular 和 Ember 都采用这种模式。**
+
+### 2.4 面试题：ViewModel有什么好处？
+
+这一题一般与Presenter比较。它的好处之一是实现了View和Model的解耦，这种解耦可以在Activity 或 Fragment 重建时保持数据不变，而 Presenter 通常不具备这种数据持久性。
+
+另外一个好处是实现了双向数据绑定。ViewModel 结合 LiveData 和 Data Binding，可以简化数据与 UI 之间的绑定过程，实现数据的自动更新，这是 Presenter 模式中不具备的。
 
 # 2024.8.25
 
