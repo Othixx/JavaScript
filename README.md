@@ -1,3 +1,61 @@
+# 2024.8.28
+
+## 1 DOM
+
+### 什么是DOM？
+
+https://www.itheima.com/news/20210616/153515.html
+
+**简而言之，它是一棵树，树中呈现出了html页面的标签。**
+
+看下面的代码：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试</title>
+</head>
+
+<body>
+    <h1>标题</h1>
+    <ul>
+        <li>
+            <a href="#">链接</a>
+        </li>
+    </ul>
+    <script>
+        //获取1i标签对象集合: HTMLCollection(2) [li, li]
+        var lis = document.getElementsByTagName('li');
+        var firstLi = lis[0];    //获取第1个1i标签的DOM对象
+        console.log(firstLi);   
+        
+        var text = firstLi.innerText;    //获取第1个1i标签的文本内容
+        console.log(text);
+        
+    </script>
+</body>
+
+</html>
+```
+
+控制台输出的结果是：
+
+```html
+<li>
+    <a href="#">链接</a>
+</li>
+
+链接
+```
+
+## 2 Vue双向绑定是如何实现的？
+
+双向绑定原理主要通过数据劫持和发布订阅模式实现的，在创建vue实例时，vue会对数据对象进行递归遍历，利用object.defineproperty方法对每个属性进行劫持。当数据发生变化时会触发相应的getter和setter方法，通知订阅者更新视图。同时vue也会将数据和视图进行绑定，当视图中的表单元素发生变化时，会触发相应事件，将新的数据同步到数据对象中，这样就实现了视图和数据的双向绑定。
+
 # 2024.8.27
 
 ## 1 Vue 生命周期
@@ -16,7 +74,34 @@
 
 Vue的异步更新是通过`nextTick`实现的。`nextTick`是一个异步方法，它会在下次DOM更新循环结束之后执行延迟回调。**Vue在更新DOM时是异步执行的，它会把数据变化的操作放到一个队列中，只有在下一个事件循环中才会执行更新。**
 
+看下面这一段Vue代码：
 
+```javascript
+methods: {
+    handleEdit () {
+      // 1. 显示输入框（异步dom更新，需要dom更新完了后面的获取焦点语句才能有效）
+      this.isShowEdit = true
+      // 2. 让输入框获取焦点
+      this.$refs.inp.focus()
+    }
+}
+```
+
+改进方法是：
+```javascript
+methods: {
+    handleEdit () {
+      // 1. 显示输入框（异步dom更新，需要dom更新完了后面的获取焦点语句才能有效）
+      this.isShowEdit = true
+      // 2. 让输入框获取焦点
+      this.$nextTick(() => {
+        this.$refs.inp.focus()
+      })
+    }
+}
+```
+
+`$nextTick()`的作用是在下次DOM更新循环结束之后执行延迟回调。
 
 # 2024.8.26
 
