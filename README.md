@@ -1,3 +1,178 @@
+# 2024.8.31
+
+### ES6模块化开发
+
+- **模块化**：将代码分割成独立的模块，便于管理和复用。
+- **ES6模块**：使用`import`和`export`关键字来导入和导出模块。
+
+### ref与reactive的区别
+
+- **ref**：用于响应式地追踪一个基本类型值。
+- **reactive**：用于创建一个响应式的复杂类型对象，如数组或对象。
+
+### 事件绑定简写
+
+- **v-on**：事件监听指令，可以简写为`@`。
+  - 例如：`@click="handleClick"` 可以简写为 `@click="handleClick"`
+
+### 键盘事件
+
+- **keydown**：当键盘按键被按下时触发。
+- **keyup**：当键盘按键被松开时触发。
+
+### 显示与隐藏
+
+- **v-show**：通过修改CSS的`display`属性来控制元素的显示与隐藏。
+  - 例如：`v-show="isVisible"`，如果`isVisible`为`false`，则添加`display: none`样式。
+
+- **v-if**：条件渲染，根据条件决定是否渲染元素。
+  - 适用于不频繁切换显示状态的情况，因为它涉及DOM的创建和销毁。
+  - 例如：`v-if="isVisible"`，如果`isVisible`为`false`，则不渲染元素。
+
+### 动态属性绑定
+
+- **v-bind**：动态绑定属性到元素。
+  - 简写形式：`:`。
+  - 例如：`:class="{ active: isActive }"` 或简写为 `:class="isActive ? 'active' : ''"`
+
+### HTML属性
+
+- **title**：鼠标悬停时显示的提示文本。
+  - 例如：`<title="这是一个提示">`
+
+- **key**：为每个元素设置一个唯一的标识，用于Vue的虚拟DOM重用机制。
+  - 例如：`<div v-for="item in items" :key="item.id">`
+
+### v-model
+
+- **双向数据绑定**：实现数据和视图的双向同步。
+- **修饰符**：
+  - `.lazy`：在`change`事件而不是`input`事件之后更新。
+  - `.number`：自动将输入值转换为数字类型。
+  - `.trim`：自动去除输入值的首尾空格。
+
+### 示例代码
+
+```html
+<!-- v-on 简写 -->
+<button @click="handleClick">点击我</button>
+
+<!-- v-show 示例 -->
+<div v-show="isVisible">这段文本会根据 isVisible 的值显示或隐藏</div>
+
+<!-- v-if 示例 -->
+<div v-if="isVisible">这段文本只有在 isVisible 为 true 时才会渲染</div>
+
+<!-- v-bind 示例 -->
+<div :class="{ active: isActive }">动态类绑定</div>
+
+<!-- v-model 示例 -->
+<input v-model="inputValue" placeholder="输入文本">
+```
+
+这份笔记总结了你提到的Vue.js开发中的一些关键概念和用法，希望对你下次回顾时有所帮助。
+
+当然可以，下面是一些代码示例，帮助你更好地理解前面提到的Vue.js的概念：
+
+### ref与reactive的使用
+
+```javascript
+// 使用ref
+import { ref } from 'vue';
+const count = ref(0);
+
+// 使用reactive
+import { reactive } from 'vue';
+const state = reactive({
+  count: 0
+});
+```
+
+### 事件绑定
+
+```html
+<!-- 完整写法 -->
+<button v-on:click="handleClick">点击我</button>
+
+<!-- 简写 -->
+<button @click="handleClick">点击我</button>
+
+<!-- 键盘事件 -->
+<input @keydown="handleKeydown" placeholder="按下键盘">
+<input @keyup="handleKeyup" placeholder="松开键盘">
+```
+
+### 显示与隐藏
+
+```html
+<!-- 使用v-show -->
+<div v-show="isVisible">这段文本会根据 isVisible 的值显示或隐藏</div>
+
+<!-- 使用v-if -->
+<div v-if="isVisible">这段文本只有在 isVisible 为 true 时才会渲染</div>
+```
+
+### 动态属性绑定
+
+```html
+<!-- 动态类绑定 -->
+<div :class="{ active: isActive, 'text-danger': hasError }">动态类绑定示例</div>
+
+<!-- 动态样式绑定 -->
+<div :style="{ color: activeColor, fontSize: fontSize + 'px' }">动态样式绑定示例</div>
+```
+
+### HTML属性
+
+```html
+<!-- title属性 -->
+<a href="https://example.com" title="这是一个链接">访问网站</a>
+
+<!-- key属性 -->
+<div v-for="(item, index) in items" :key="item.id">
+  {{ item.name }}
+</div>
+```
+
+### v-model
+
+```html
+<!-- 基本的v-model -->
+<input v-model="inputValue" placeholder="输入文本">
+
+<!-- 使用修饰符 -->
+<input v-model.lazy="inputValue" placeholder="回车后更新">
+<input v-model.number="inputValue" type="number" placeholder="自动转为数字">
+<input v-model.trim="inputValue" placeholder="去除首尾空格">
+```
+
+### 组件中的使用
+
+```html
+<!-- 组件中的v-model -->
+<template>
+  <MyComponent v-model="inputValue" />
+</template>
+
+<script>
+import MyComponent from './MyComponent.vue';
+
+export default {
+  components: {
+    MyComponent
+  },
+  data() {
+    return {
+      inputValue: ''
+    };
+  }
+}
+</script>
+```
+
+这些代码示例应该能帮助你更好地理解和记忆Vue.js中的这些概念。在实际开发中，你可以根据需要选择合适的语法和方法来实现功能。
+
+
 # 2024.8.28
 
 ## 1 DOM
