@@ -1,3 +1,131 @@
+# 2024.9.2
+
+## 子组件向父组件传递`emits`
+
+```html
+<!--./App.vue-->
+<script setup>
+import { reactive, ref } from 'vue'
+
+//导入子组件
+import Header from "./components/header.vue"
+
+//响应式数据
+const web = reactive({
+  name: "邓瑞编程",
+  url: 'dengruicode.com'
+})
+
+const user = ref(0)
+
+//子传父
+const emitsGetWeb = (data) =>{
+  console.log(data);
+  web.url = data.url
+}
+
+const emitsUserAdd = (data) => {
+  console.log(data);
+  user.value += data
+}
+
+</script>
+
+<template>
+  <!-- 子传父 -->
+  <Header @getWeb="emitsGetWeb" @userAdd="emitsUserAdd"/>
+
+  {{ web.url }} - {{ user }}
+</template>
+
+<style scoped></style>
+```
+
+```html
+<!--./components/header.vue-->
+<script setup>
+//子组件
+/*
+    defineEmits是Vue3的编译时宏函数,
+    用于子组件向父组件发送自定义事件
+*/
+//子传父
+//定义一个名为 emits 的对象, 用于存储自定义事件
+const emits = defineEmits(["getWeb", "userAdd"])
+//发送名为 web 和 user 的自定义事件
+emits("getWeb", {name: "Othixx", url: "www.dengruicode.com"})
+//添加用户
+const add = () => {
+    emits("userAdd", 10)
+}
+</script>
+
+<template>
+    <h3>Header</h3>
+
+    <button @click="add">添加用户</button>
+</template>
+
+<style scoped></style>
+```
+
+## `toRefs`和`toRef`
+
+这两个方法的作用是将响应式对象转换为ref对象。`toRefs`将一个响应式对象的所有属性转换为ref对象，`toRef`将一个响应式对象的某个属性转换为ref变量。
+
+```html
+<script setup>
+  import { reactive, toRef, toRefs } from 'vue'
+
+  /*
+  let {name,url} = reactive({
+    name:"邓瑞编程",
+    url:"dengruicode.com"
+  })
+  */
+  let web = reactive({
+    name:"邓瑞编程",
+    url:"dengruicode.com"
+  })
+
+  //toRefs将一个响应式对象的所有属性转换为ref对象
+  let {name,url} = toRefs(web)
+  console.log(name);
+  console.log(url);
+  
+
+  //toRef将一个响应式对象的某个属性转换为ref变量
+  // let url = toRef(web, "url")
+
+  const setUrl = () => {
+    console.log(url)
+    url.value = "www.dengruicode.com"
+  }
+</script>
+
+<template>
+  {{ url }}
+
+  <button @click="setUrl">设置网址</button>
+</template>
+
+<style scoped>
+
+</style>
+
+```
+
+# 2024.9.1
+
+# 1 Change 事件
+
+在Vue.js中，@change 是一个事件监听器，用于监听表单元素（如 input、select、textarea 等）的 change 事件。当表单元素的值发生变化并且用户完成输入（即用户从输入框移开光标，或者按下回车键）时，change 事件会被触发。
+
+**使用场景**
+1. 监听 input 元素的值变化，例如文本框、复选框、单选按钮等。
+2. 监听 select 元素的选项变化。
+3. 监听 textarea 的内容变化。
+
 # 2024.8.31
 
 ### ES6模块化开发
@@ -76,16 +204,31 @@
 
 ### ref与reactive的使用
 
-```javascript
-// 使用ref
-import { ref } from 'vue';
-const count = ref(0);
+一个是通过`.value`访问和修改，一个是直接访问和修改。
 
-// 使用reactive
-import { reactive } from 'vue';
+```javascript
+import { reactive, ref } from 'vue';
+
+// 使用 reactive 创建响应式对象
 const state = reactive({
-  count: 0
+  count: 0,
+  details: {
+    name: 'Kimi',
+    age: 30
+  }
 });
+
+// 使用 ref 创建响应式引用
+const count = ref(0);
+const name = ref('Kimi');
+
+// 访问和修改 reactive 对象
+state.count++; // 直接修改
+console.log(state.count); // 直接访问
+
+// 访问和修改 ref
+count.value++; // 通过 .value 修改
+console.log(count.value); // 通过 .value 访问
 ```
 
 ### 事件绑定
@@ -139,6 +282,20 @@ const state = reactive({
 ```html
 <!-- 基本的v-model -->
 <input v-model="inputValue" placeholder="输入文本">
+
+对于 <input type="checkbox">、<input type="radio"> 和 <select> 元素，v-model 会做一些不同的事情：
+
+<!-- 复选框 -->   <!-- toggle 的值将会是选中时的 true-value，未选中时的 false-value -->
+<input type="checkbox" v-model="toggle" true-value="yes" false-value="no">
+
+<!-- 单选按钮 -->   <!-- pick 的值将会是选中的选项的 value -->
+<input type="radio" v-model="pick" :value="a">
+
+<!-- 下拉框 -->
+<select v-model="selected">   <!-- selected 的值将会是选中的选项的 value -->
+  <option :value="a">A</option>
+  <option :value="b">B</option>
+</select>
 
 <!-- 使用修饰符 -->
 <input v-model.lazy="inputValue" placeholder="回车后更新">
