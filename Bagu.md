@@ -466,3 +466,115 @@ const arr = [];
 console.log(arr.constructor === Array); // true
 ```
 
+# 12 JS 数组去重的办法
+
+1. 使用 Set：Set 是 ES6 新增的一种数据结构，它类似于数组，但是成员的值都是唯一的。
+
+```js
+const arr = [1, 2, 3, 3, 4, 4, 5];
+const uniqueArr = [...new Set(arr)];
+console.log(uniqueArr); // [1, 2, 3, 4, 5]
+```
+
+PS: 用`Array.from(new Set(arr))`也可以。
+
+2. 自己写一套逻辑。使用indexOf
+
+**indexOf方法是寻找该元素的第一个索引。**
+
+```js
+const arr = [1, 2, 3, 3, 4, 4, 5];
+const uniqueArr = [];
+for (let i = 0; i < arr.length; i++) {
+  if (uniqueArr.indexOf(arr[i]) === -1) {   // indexOf返回-1表示没有找到
+    uniqueArr.push(arr[i]);
+  }
+}
+console.log(uniqueArr); // [1, 2, 3, 4, 5]
+```
+
+3. 使用filter
+
+```js
+const arr = [1, 2, 3, 3, 4, 4, 5];
+const uniqueArr = arr.filter((item, index) => arr.indexOf(item) === index);
+console.log(uniqueArr); // [1, 2, 3, 4, 5]
+```
+
+# 13 说一说伪数组和数组的区别
+
+**伪数组：** 又叫对象数组，是一个对象，有length属性，但是没有数组的方法，比如push、pop、slice等。
+
+1. 伪数组长度不可变，数组长度可变。
+2. 因为是对象数组，所以伪数组用for in遍历，数组更适合使用for of
+3. 函数的arguments（参数），原生获取dom标签（比如获取div）获得的都是伪数组。
+
+PS：原生获取DOM标签的一些方法：`getElementById`、`getElementsByTagName`、`getElementsByClassName`、`querySelectorAll`等。
+
+# 14 说一说map和forEach的区别
+
+1. map：返回一个新数组，数组中的元素为原始数组元素调用函数处理后的值。
+
+```js
+const arr = [1, 2, 3];
+const newArr = arr.map(item => item * 2);
+console.log(newArr); // [2, 4, 6]
+```
+
+2. forEach：对数组的每个元素执行一次提供的函数，没有返回值。
+
+```js
+const arr = [1, 2, 3];
+arr.forEach(item => console.log(item));
+```
+
+# 15 说一说ES6箭头函数和普通函数的区别
+
+1. 箭头函数没有自己的this，它的this是继承外层的this。
+  
+```js
+function foo() {
+  setTimeout(() => {
+    console.log(this.a);
+  }, 100);
+}
+
+foo.call({ a: 1 }); // 1
+```
+
+2. 箭头函数没有arguments，可以使用rest参数代替。
+
+```js
+function foo() {
+  console.log(arguments);
+}
+
+foo(1, 2, 3); // [1, 2, 3]
+
+const bar = (...args) => {
+  console.log(args);
+}
+
+bar(1, 2, 3); // [1, 2, 3]
+```
+
+PS：针对arguments，请看下面的说明：
+
+在 JavaScript 中，arguments 是一个特殊的类数组对象，它包含了函数调用时传入的所有参数。这个对象在函数体内部可用，它允许你访问函数的参数，即使函数没有使用正式的参数名。
+
+```js
+function exampleFunc() {
+  console.log(arguments.length); // 输出参数的数量
+  console.log(arguments[0]);     // 输出第一个参数
+  console.log(arguments[1]);     // 输出第二个参数
+}
+
+exampleFunc(1, 2, 3); // 输出：3, 1, 2
+```
+
+3. 箭头函数没有原型属性。
+
+4. 箭头函数不能作为构造函数，不能使用new关键字调用。
+
+5. 箭头函数没有super。
+
