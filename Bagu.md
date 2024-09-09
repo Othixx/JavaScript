@@ -530,7 +530,7 @@ arr.forEach(item => console.log(item));
 
 # 15 说一说ES6箭头函数和普通函数的区别
 
-1. 箭头函数没有自己的this，它的this是继承外层的this。
+1. 箭头函数没有自己的this，它的this是继承外层的this。**如果找不到外层的普通函数时，一般指向window。**
   
 ```js
 function foo() {
@@ -572,16 +572,185 @@ function exampleFunc() {
 exampleFunc(1, 2, 3); // 输出：3, 1, 2
 ```
 
-3. 箭头函数没有原型属性。
-
-4. 箭头函数不能作为构造函数，不能使用new关键字调用。
+4. 箭头函数因为没有`this`，所以显然也就不能有`new`来进行调用。
 
 5. 箭头函数没有super。
 
+# 16 事件扩展符用过吗(...)，什么场景下？
 
+**当我们在代码中看到 "..." 时，它要么是 rest 参数，要么是 spread 语法。**
+
+Rest 参数用于创建可接受任意数量参数的函数。Spread 语法用于在函数调用/数组构造时，将数组表达式或者 string 在语法层面展开。
+
+1. `rest`参数
+
+看下面的例子：
+
+```javascript
+function sumAll(...args) { // 数组名为 args
+  let sum = 0;
+
+  for (let arg of args) sum += arg;
+
+  return sum;
+}
+
+alert( sumAll(1) ); // 1
+alert( sumAll(1, 2) ); // 3
+alert( sumAll(1, 2, 3) ); // 6
+```
+
+注意：`...` 只能放在参数的最后。
+
+2. `spread`语法
+
+最大最小值的比较、数组合并连接、复制数组等都可以用到。
+
+```javascript
+let arr = [3, 5, 1];
+let arr2 = [8, 9, 15];
+
+let merged = [0, ...arr, 2, ...arr2];
+
+alert(merged); // 0,3,5,1,2,8,9,15（0，然后是 arr，然后是 2，然后是 arr2）
+```
+
+```javascript
+let str = "Hello";
+
+alert( [...str] ); // H,e,l,l,o
+console.log( ...str ); // H e l l o
+```
+
+3. `arguments`参数
+
+在过去，它是获取函数所有参数的唯一方法。现在它仍然有效。
 
 # 操作系统
 
 周转时间 = 任务完成时间 - 到达时间
 
 相应比 = （等待时间 + 服务时间）/ 服务时间
+
+# 17 什么是闭包？
+
+**闭包**是指一个函数可以记住其外部变量并可以访问这些变量。JavaScript 中的函数会自动通过隐藏的 `[[Environment]]` 属性记住创建它们的位置，所以它们都可以访问外部变量。
+
+https://zh.javascript.info/closure#step-4-fan-hui-han-shu 这一段还不太懂，前面的已经看懂。
+
+# 18 JS 变量提升
+
+**JS在预编译阶段会将`函数`和`var`定义的变量提升至最前面先执行。**
+
+1. var 声明的变量没有块级作用域，它们仅在当前函数内可见，或者全局可见（如果变量是在函数外声明的）。
+2. var 变量声明在函数开头就会被处理（脚本启动对应全局变量）。
+
+而let和const声明的变量只是创建提升，在预编译中将其创建，形成暂时性死区，不能提前访问和调用变量，只能在赋值之后进行调用和访问。
+
+# 19 `this`指向
+
+普通函数指向调用处，箭头函数指向定义处。此外，如果普通函数的调用者是window，那么在非严格模式下，this指向window，严格模式下指向undefined。
+
+# 20 `apply` `call` 与 `bind`
+
+首先，call apply bind三个方法都可以用来改变函数的this指向，具体区别如下：
+   
+  1. fn.call (newThis,params) call函数的第一个参数是this的新指向，后面依次传入函数fn要用到的参数。会立即执行fn函数。  
+ 
+  2. fn.apply (newThis,paramsArr) apply函数的第一个参数是this的新指向,第二个参数是fn要用到的参数数组，会立即执行fn函数。  
+ 
+  3. fn.bind (newThis,params) bind函数的第一个参数是this的新指向，后面的参数可以直接传递，也可以按数组的形式传入。  不会立即执行fn函数，且**只能改变一次fn函数的指向，后续再用bind更改无效**。返回的是已经更改this指向的新fn。**bind是把修改好了绑定对象的东西赋值给新函数。**
+
+
+**`call`喜欢一个一个调，`apply`喜欢一组一组调。**
+
+要指定函数的this指向哪个对象，可以用函数本身的apply方法，它接收两个参数，第一个参数就是需要绑定的this变量，第二个参数是Array，表示函数本身的参数。
+
+```javascript
+function getAge() {
+    let y = new Date().getFullYear();
+    return y - this.birth;
+}
+
+let xiaoming = {
+    name: '小明',
+    birth: 1990,
+    age: getAge
+};
+
+xiaoming.age(); // 25
+getAge.apply(xiaoming, []); // 25, this指向xiaoming, 参数为空
+```
+
+另一个与apply()类似的方法是call()，唯一区别是：
+
+apply()把参数打包成Array再传入；
+
+call()把参数按顺序传入。
+
+```javascript
+Math.max.apply(null, [3, 5, 4]); // 5
+Math.max.call(null, 3, 5, 4); // 5
+```
+
+下面是bind:
+
+```javascript
+let user = {
+    name_: "xiaoming",
+    id: "woshiniba"
+};
+
+let newUser = {
+    name_: "daming",
+    id: "woshinibaba"
+};
+
+function getId() {
+    console.log(this.name_);
+    console.log(this.id);
+}
+
+// user.getId();
+
+getId();
+
+let getUserId = getId.bind(user);
+
+getUserId();
+
+let getNewUserId = getId.bind(newUser);
+
+getNewUserId();
+
+let newFunc1 = getUserId.bind(newUser);
+let newFunc2 = getId.bind(newUser);
+
+newFunc1();
+newFunc2();
+```
+
+打印的结果为：
+
+```javascript
+undefined
+undefined
+xiaoming
+woshiniba
+daming
+woshinibaba
+xiaoming
+woshiniba
+daming
+woshinibaba
+```
+
+# 21 JS有哪些继承方法及优缺点？
+
+在JavaScript高级程序设计一书中，提到js中有六种继承方式，但阅读后，个人觉得这六种方式，其实最终也只是对原型和构造函数通过不同的技巧实现的继承设计方式罢了，为了满足需要其实我们也可以自己去定义技巧实现继承，那么如此说来继承方式岂非不是仅仅只有六种乎？
+
+原型链继承、借用构造函数继承、组合继承、原型式继承、寄生继承、寄生组合继承。
+
+## 说一说进程与线程的区别
+
+## 说一说键入URL发生了什么？

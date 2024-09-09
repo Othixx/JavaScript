@@ -1,11 +1,14 @@
-const user = {
-    name: '小明',
-    walk: () => {
-        console.log(this);
-    },
+let group = {
+    title: "Our Group",
+    students: ["John", "Pete", "Alice"],
+
+    showList() {
+        this.students.forEach(function (student) {
+            // Error: Cannot read property 'title' of undefined
+            console.log(this);
+            console.log(this.title + ': ' + student);
+        });
+    }
 };
 
-// let xiaoming = new user;
-
-user.walk();
-console.log(this);
+group.showList();
