@@ -751,6 +751,248 @@ woshinibaba
 
 原型链继承、借用构造函数继承、组合继承、原型式继承、寄生继承、寄生组合继承。
 
+# 22 说一说new会发生什么？
+
+1. 创建了一个新对象
+2. this指向了这个对象
+3. 构造函数的属性和方法都赋给了这个对象
+4. 返回这个新对象
+
+# 23 说一说`defer`和`async`的异同
+
+`defer`和`async`都是用来异步加载脚本的属性。`async` 和 `defer` 有一个共同点：加载这样的脚本都不会阻塞页面的渲染。**而如果在html中遇到普通的`<script>`标签，DOM树会暂停渲染，浏览器会马上下载标签中的js脚本并执行，待执行完成之后才会继续渲染DOM树。** 因此，用户可以立即阅读并了解页面内容。
+
+但是，它们之间也存在一些本质的区别：
+
+|         | 顺序 | `DOMContentLoaded` |
+|---------|---------|---------|
+| `async` | **加载优先顺序**。脚本在文档中的顺序不重要 —— 先加载完成的先执行 | 不相关。可能在文档加载完成前加载并执行完毕。如果脚本很小或者来自于缓存，同时文档足够长，就会发生这种情况。 |
+| `defer` | **文档顺序**（它们在文档中的顺序） | 在文档加载和解析完成之后（如果需要，则会等待），即在 `DOMContentLoaded` 之前执行。 |
+
+**在实际开发中，`defer` 用于需要整个 DOM 的脚本，和/或脚本的相对执行顺序很重要的时候。简单来说，如果脚本依赖页面中的DOM元素，那么就要用defer（例如评论区和代码语法高亮）。此外它会按照我们定义的顺序做依次执行。**
+
+**`async` 用于独立脚本，例如计数器或广告，这些脚本的相对执行顺序无关紧要。**
+
+# 24 Promise 的使用
+
+JS是一门单线程的编程语言，它的所有程序都运行在同一个线程中。**好处就是它能减少线程内存开销以及线程切换开销。**
+
+Promise是一种处理异步代码，而不会陷入回调地狱的方式。**它解决了前端程序员的“回调地狱”问题。**
+
+# 视频: https://www.bilibili.com/video/BV1454y1R7vj?p=10
+
+视频作者: 杰哥课堂(B站)
+
+## 1.1 为什么需要Promise
+- **需求**
+  通过AJAX请求id ,再根据id请求用户名.再根据用户名,再根据用户名获取email
+- **回调地狱**
+  回调函数中嵌套回调
+  Promise解决了回调地狱
+
+## 1.2 Promise 的基本使用
+### 语法
+```javascript
+new Promise((resolve, reject) => {})
+```
+- Promise接受一个函数作为参数
+- 在参数函数中有两个参数
+  - `resolve`: 成功函数
+  - `reject`: 失败函数
+
+### Promise实例
+Promise实例有两个属性
+- `state`: 状态
+- `result`: 结果
+
+#### 1) Promise的状态
+- 第一种状态: `pending`
+- 第二种状态: `fulfilled`
+- 第三种状态: `rejected`
+
+#### 2) Promise状态的改变
+示例1
+```javascript
+const p = new Promise((resolve, reject) => {
+  resolve();
+});
+console.dir(p); // fulfilled
+```
+示例2
+```javascript
+const p = new Promise((resolve, reject) => {
+  reject();
+});
+console.dir(p);
+```
+- `resolve()`: 调用函数, 使当前Promise对象的状态改成`fulfilled`
+- `reject()`: 调用函数,使当前Promise对象状态改成`rejected`
+Promise状态的改变是一次性的
+
+#### 3) Promise 的结果
+示例
+```javascript
+const p = new Promise((resolve, reject) => {
+  resolve("成功的结果");
+});
+console.dir(p);
+```
+
+### 1.3 Promise的方法
+#### 1) then方法
+示例1
+```javascript
+const p = new Promise((resolve, reject) => {
+  reject("失败的结果");
+});
+
+p.then(() => {
+  console.log("成功的回调");
+}, () => {
+  console.log("失败时调用");
+});
+```
+示例2
+```javascript
+const p = new Promise((resolve, reject) => {
+  reject("失败的结果");
+});
+
+p.then((value) => {
+  console.log("成功的回调", value);
+}, (err) => {
+  console.log("失败时调用", err);
+});
+```
+- 在then方法的参数函数中,通过形参使用Promise对象的结果
+- `then`方法返回一个新的Promise实例,状态是`pending`
+
+#### 2) catch方法
+示例
+```javascript
+const p = new Promise((resolve, reject) => {
+  throw new Error("出错了");
+});
+
+p.catch((reason) => {
+  console.log("失败", reason);
+});
+```
+
+### 1.4 优化代码
+示例
+```javascript
+function getData(url, data = {}) {
+  return new Promise((resolve, reject) => {
+    $.ajax({
+      type: "GET",
+      url: url,
+      data: data,
+      success: function (res) {
+        resolve(res);
+      },
+      error: function (res) {
+        reject(res);
+      }
+    });
+  });
+}
+
+getData("data1.json")
+  .then((data) => {
+    const { id } = data;
+    return getData("data2.json", {id});
+  })
+  .then((data) => {
+    const { usename } = data;
+    return getData("data3.json", {usename});
+  })
+  .then((data) => {
+    console.log(data);
+  });
+```
+
+# 25 说一说JS实现异步的方法
+
+1. Promise
+2. 定时器（`setTimeout` `setInterval`）
+它们两个语法相同，只是一个是等待一定时间后执行一次，一个是每隔一定时间执行一次。
+3. 回调函数(**要注意的是它并不是JS中内置的，而是人为定义的一个东西。**)
+
+# 26 说一说 `cookie` `sessionStorage` `localStorage` 的区别
+
+它们都是用来存储数据的，但是有一些区别：
+
+![cookie](./imgs/5.png)
+
+# 27 如何实现可过期的localStorage
+
+1. 惰性删除：存储数据时使用对象类型，添加一个key值为当前存储时间，当下一次使用时，判断与当前时间的间隔，如果超过过期时间就清除数据；
+2. 定时删除：每隔一段时间进行一次删除操作，通过限制删除操作执行的次数和频率，来减少删除操作对CPU的长期占用，获取所有设置过期时间的key判断是否过期，过期就存储到数组中，遍历数组，每隔1S（固定时间）删除5个（固定个数），直到把数组中的key从localstorage中全部删除。
+
+# 28 说一说`token`可以存放在`cookie`中吗？
+
+1. 实现上是可以的，功能上不推荐，容易产生csrf问题。
+
+2. token一般存储在sessionStorage/localStorage里面。token的出现就是为了解决用户登录后的鉴权问题，如果采用cookie+session的鉴权方式，则无法有效地防止CSRF攻击，同时，如果服务端采用负载均衡策略进行分布式架构，session也会存在一致性问题，需要额外的开销维护session一致性。
+
+# 29 说一说axios拦截器原理及应用
+
+1. 拦截器分为 请求（request）拦截器和 响应（response）拦截器。
+2. 请求拦截器用于在接口请求之前做的处理，比如为每个请求带上相应的参数（token，时间戳等）。
+3. 返回拦截器用于在接口返回之后做的处理，比如对返回的状态进行判断（token是否过期）
+4. 拦截器原理：创建一个chn数组，数组中保存了拦截器相应方法以及dispatchRequest（dispatchRequest这个函数调用才会真正的开始下发请求），把请求拦截器的方法放到chn数组中dispatchRequest的前面，把响应拦截器的方法放到chn数组中dispatchRequest的后面，把请求拦截器和相应拦截器forEach将它们分unshift,push到chn数组中，为了保证它们的执行顺序，需要使用promise，以出队列的方式对chn数组中的方法挨个执行。
+5. 从浏览器中创建 XMLHttpRequests,从 node.js 创建 http 请求,支持 Promise API,可拦截请求和响应，可转换请求数据和响应数据，可取消请求，可自动转换 JSON 数据，客户端支持防御 XSRF
+
+# 30 说一说创建AJAX的过程
+
+1. 创建XHR对象：new XMLHttpRequest()
+2. 设置请求参数：request.open(Method, 服务器接口地址);
+3. 发送请求: request.send()，如果是get请求不需要参数，post请求需要参数request.send(data)
+4. 监听请求成功后的状态变化：根据状态码进行相应的处理:
+
+```javascript
+XHR.onreadystatechange = function () { 
+    if (XHR.readyState == 4 && XHR.status == 200) { 
+    console.log(XHR.responseText); // 主动释放,JS本身也会回收的 
+    XHR = null; 
+    } 
+ };
+```
+
+# 31 说一下fetch请求方式
+
+fetch 是 XMLHttpRequest 的一种替代方案，fetch是js原生语法也能像ajax一样获取后台数据
+
+优点：
+- 基于标准Promise实现，支持async/ await
+- 语法简洁，更加语意化fetch 可以理解成简化版的 XMLHttpRequest
+缺点：
+- 兼容性不好，不支持IE
+- 不能中断请求（xhr有个xhr.abort 方法能直接中断请求）
+- 没法检测请求进度
+
+# 32 说一说有什么办法可以保持前后端的实时通信
+
+1. 轮询、长轮询、 iframe流、WebSocket、SSE
+2. 轮询是客户端和服务器之间会一直进行连接，每隔一段时间就询问一次。
+3. 长轮询是对轮询的改进版，客户端发送HTTP给服务器之后，如果没有新消息，就一直等待。有新消息，才会返回给客户端。
+4. iframe流方式是在页面中插入一个隐藏的iframe，利用其src属性在服务器和客户端之间创建一条长连接，服务器向iframe传输数据（通常是HTML，内有负责插入信息的javascript），来实时更新页面。
+5. WebSocket是类似Socket的TCP长连接的通讯模式，一旦WebSocket连接建立后，后续数据都以帧序列的形式传输。
+6. SSE(Server-Sent Event)是建立在浏览器与服务器之间的通信渠道，然后服务器向浏览器推送信息。
+7. 应用：
+轮询适用于：小型应用，实时性不高
+
+长轮询适用于：一些早期的对及时性有
+一些要求的应用：web IM 聊天 
+
+iframe适用于：客服通信等 
+
+WebSocket适用于：微信、网络互动游戏等 
+
+SSE适用于：金融股票数据、看板等
+
+
 ## 说一说进程与线程的区别
 
 ## 说一说键入URL发生了什么？
