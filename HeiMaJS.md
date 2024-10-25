@@ -51,3 +51,18 @@ JavaScript = ECMAScript(JSC语言基础) + WebAPIs(BOM + DOM)
 `innerHTML`属性可以获取或设置元素的HTML内容，**可以获取标签内容。**
 
 **如果你还在纠结使用谁，我们就使用innerHTML。**
+
+### 5. 操作DOM元素属性
+
+#### 5.1 修改DOM元素常见属性
+
+直接使用`元素对象.属性名 = 需要修改的属性值`这种方式来修改元素的属性。举例：
+
+```javascript
+// 获取元素
+const img = document.querySelector('img');
+// 修改img的src属性
+img.src = 'https://www.baidu.com/img/flexible/logo/pc/result.png';  // 直接通过对象.属性名 = 属性值来修改
+```
+
+#### 5.2 修改DOM元素`样式`属性
