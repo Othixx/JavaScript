@@ -66,3 +66,30 @@ img.src = 'https://www.baidu.com/img/flexible/logo/pc/result.png';  // 直接通
 ```
 
 #### 5.2 修改DOM元素`样式`属性
+
+**修改DOM元素的样式属性，常见有下面的三种方式：**
+
+1. 通过`style`修改样式
+2. 通过类名修改样式
+3. 通过classList修改样式
+
+##### 5.2.1 通过`style`修改样式
+
+采用如下的语句：`对象.style.样式属性 = '值'`
+
+```javascript
+// 获取元素
+const p = document.querySelector('p');
+// 修改p的样式
+p.style.color = 'red';  // 通过style修改样式
+p.style.fontSize = '30px';  // 注意，一般都需要带上单位
+p.style.backgroundColor = 'black';  // 如果遇到多个单词使用'-'组成的属性，需要将后面的单词首字母大写，使用小驼峰命名法
+```
+
+**注意，当修改`body`元素的属性时，我们一般不需要先获取元素，因为整个页面只有一个body元素。**
+
+```javascript
+// 修改body的背景颜色
+document.body.style.backgroundColor = 'black';
+```
+
