@@ -45,3 +45,106 @@ border 三种属性 四个方向：
 `margin collapse`现象。区块的**上下外边距**有时会合并（折叠）为单个边距，其大小为两个边距中的最大值，但**不包括**浮动和绝对定位的元素。
 
 **标准盒模型和IE盒模型的区别**：IE盒模型的width包括了border和padding。其实很多时候我们还是用的IE盒模型多。
+
+## 3.2 深入理解CSS（下）
+
+![alt text](image-14.png)
+![alt text](image.png)
+![alt text](image-1.png)
+
+### 3.2.1 CSS盒模型——块级元素
+
+块级排版上下文 Block Formatting Context（BFC）：块级元素的排版规则。
+
+### 3.2.2 CSS盒模型——行级元素
+
+行级排版上下文 Inline Formatting Context（IFC）：行级元素的排版规则。
+
+`overflow-wrap`属性：设置是否允许文本在单词内换行。
+
+**请注意，行级元素和块级元素不能同时放。如果试图在一个行级元素中引入块级元素，那么行级元素会被拆开成两行，中间单独放置块级元素。如下例：**
+
+![alt text](image-2.png)
+
+看这个示例，`<span>`是行级元素，`<div>`是块级元素，所以`<span>`会被拆开成两行。同时有一个很有意思的点就是，第一行的`<span>`没有右边框，第二行的`<span>`没有左边框，这是因为`<span>`被拆开成两行，所以两行之间的边框是不会重叠的。
+
+### 3.2.3 Flex 布局
+
+![alt text](image-3.png)
+![alt text](image-4.png)
+
+`flex-direction`属性：决定flex容器的排列方向。
+
+`justify-content`属性：定义了项目在主轴上的对齐方式。默认为`flex-start`，即左对齐。
+
+`align-items`属性：定义了项目在侧轴上的对齐方式。默认为`stretch`，即拉伸。
+
+![alt text](image-5.png)
+![alt text](image-6.png)
+
+注：`baseline`对齐方式，是指项目的第一行文字的基线对齐。
+
+另外，Flex布局还有一个很重要的属性，就是`flex`属性。`flex`属性是`flex-grow`、`flex-shrink`和`flex-basis`的简写，默认值为`0 1 auto`。它们用来设置子项的弹性，当容器有剩余空间时，会伸展，容器空间不够时，会收缩。
+![alt text](image-7.png)
+![alt text](image-8.png)
+
+### 3.2.4 Grid 布局
+
+**Grid布局，又叫网格布局，是CSS的一个强大的布局武器。有了它之后几乎所有的的布局问题都被解决。**
+
+**布局三步法：**
+![alt text](image-11.png)
+
+设置网格属性：
+![alt text](image-12.png)
+
+网格线：
+![alt text](image-9.png)
+
+划分网格的代码写法：
+![alt text](image-10.png)
+
+### 3.2.5 Float浮动
+
+**现在用的不多了，主要就是图文混排。其他奇奇怪怪的问题都直接交给Flex和Grid去解决就可以。**
+
+![alt text](image-15.png)
+
+如图，设置`float: left`实现图片左对齐混排。
+
+### 3.2.6 绝对定位
+
+![alt text](image-18.png)
+![alt text](image-16.png)
+`position-absolute`：逐个寻找，找到最近的有定位属性的父元素，然后根据这个父元素来定位。**例子中，父元素为`html`。**
+
+![alt text](image-17.png)
+`position-fixed`：固定定位，元素相对于**浏览器窗口**固定位置。
+
+# 4 如何写好JavaScript
+
+写好JS代码，月影老师给我们归纳了**三大原则：各司其职、组件封装、过程抽象。**
+
+## 4.1 各司其职
+
+意思就是，让HTML负责结构，CSS负责样式，JS负责行为。**应该尽量避免让JS直接操作CSS样式。**
+
+例子引出：
+![alt text](image-19.png)
+写一段JS，控制一个网页，让它支持浅色和深色两种模式并实现切换，你会怎么做？
+
+**方法一：直接通过JS来修改CSS的样式（不推荐）**
+
+![alt text](image-20.png)
+这种做法并不推荐，因为当同事在维护你的代码时，他不容易看出来这段代码的逻辑具体是实现一个什么需求的。而且如果老板给你了一个新需求，你直接修改样式，如果没有发现这一段JS代码，那么很可能需要debug很久，无法实现老板所需的央视需求。**这是因为没有做到“各司其责”，让JS做了CSS的事情。**
+
+**方法二：通过JS来修改class类名（推荐），通过在类名中定义CSS来实现效果。**
+
+**清楚明了。**
+![alt text](image-21.png)
+![alt text](image-22.png)
+
+**方法三：0 JS方案（推荐）**
+
+![alt text](image-23.png)
+在HTML中定义一个`checkBox`来实现。这种办法十分巧妙，是最好的代码实现方式，不过我们在实际开发中也不强求，如果想到了就使用，如果没想到就算了。
