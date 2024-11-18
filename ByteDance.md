@@ -189,7 +189,234 @@ JS混合式编程，既会命令式又会声明式。
 
 代码优化的四大技术：**风格优先、保证正确、封装函数、妙用特性。**
 
-### 4.4.1 交通灯切换
+### 4.4.1 封装函数 交通灯切换
 
 最可行简单符合规范的方法是使用Promise。
 https://juejin.cn/post/7002851081826861093
+
+### 4.4.2 妙用特性 4的幂 LeetCode 342
+
+妙用JS特性加速。https://juejin.cn/post/7003693349748244516
+
+### 4.4.3 保证正确 洗牌、分红包
+
+https://juejin.cn/post/7002122662168395812
+
+# 5 深入浅出TypeScript
+
+![alt text](image-30.png)
+
+## 5.1 TS介绍
+
+TS为我们带来了什么？简单来讲就是：①类型安全②下一代JS特性③更完善的工具链。下面分别介绍一下这三点。
+
+1. 类型安全：类型安全是指在编程语言中，**变量和表达式的类型在编译时或运行时得到严格检查**，（而JS是弱类型语言）以确保它们的使用符合预期。这种检查可以防止类型错误，例如将字符串赋值给期望整数的变量，从而提高代码的健壮性和可靠性。类型安全的语言可以在编译阶段捕获许多潜在的错误，减少运行时错误的发生。
+2. 下一代JS特性：TS是JS的超集，所以TS可以使用ES6、ES7等新特性。
+3. **更完善的工具链**：TS提供了更完善的工具链，比如类型检查、代码提示、重构等。这一点最重要，这说明TS不仅仅是一个语言，更是一个生产力工具。
+
+**TypeScript Playground: https://www.typescriptlang.org/zh/**
+
+**Awesome TypeScript: https://github.com/dzharii/awesome-typescript#tools**
+
+## 5.2 TS基础类型
+
+TypeScript 提供了一些基础类型，用于在编写代码时进行类型检查：
+
+- `boolean`：表示布尔值，只有 `true` 和 `false` 两个取值。
+- `number`：表示数字，包括整数和浮点数。
+- `string`：表示字符串类型。
+- `enum`：枚举类型，用于定义一组命名常量。
+- `any`：表示任意类型，关闭类型检查。
+- `unknown`：表示未知类型，类似于 `any`，但更安全。
+- `void`：表示没有任何类型，通常用于函数没有返回值的情况。
+- `never`：表示永不存在的值的类型，例如抛出异常或无限循环的函数。
+
+对比 JavaScript 的基本数据类型（区分大小写）：
+
+- `Number`：表示数字类型。
+- `String`：表示字符串类型。
+- `Boolean`：表示布尔值类型。
+- `Null`：表示空值。
+- `Undefined`：表示未定义的值。
+- `Symbol`：表示唯一的标识符（ES6 新增）。
+- `BigInt`：表示大整数（ES10 新增）。
+
+JavaScript 的引用数据类型包括：
+
+- `Object`：表示对象类型，包括数组、函数等。
+
+## 5.3 接口、函数重载、类与继承（类似Java）
+
+### 5.3.1 接口
+
+接口（Interface）是 TypeScript 中用于定义对象的类型。它可以用来描述对象的形状，确保对象具有特定的结构。接口可以定义属性和方法，并且可以通过 `implements` 关键字让类实现接口。
+
+```typescript
+interface Person {
+    name: string;
+    age: number;
+    greet(): void;
+}
+
+class Student implements Person {
+    name: string;
+    age: number;
+    
+    constructor(name: string, age: number) {
+        this.name = name;
+        this.age = age;
+    }
+
+    greet() {
+        console.log(`Hello, my name is ${this.name} and I am ${this.age} years old.`);
+    }
+}
+```
+
+### 5.3.2 函数重载
+
+函数重载（Function Overloading）允许一个函数根据传入参数的不同而具有不同的实现。在 TypeScript 中，可以为同一个函数提供多个函数类型定义，以实现函数重载。
+
+```typescript
+function add(a: number, b: number): number;
+function add(a: string, b: string): string;
+function add(a: any, b: any): any {
+    return a + b;
+}
+
+console.log(add(1, 2)); // 输出: 3
+console.log(add('Hello, ', 'world!')); // 输出: Hello, world!
+```
+
+### 5.3.3 类与继承
+
+类（Class）是 TypeScript 中用于创建对象的蓝图。类可以包含属性和方法，并且可以通过 `extends` 关键字实现继承。继承允许一个类继承另一个类的属性和方法，从而实现代码重用。
+
+```typescript
+class Animal {
+    name: string;
+
+    constructor(name: string) {
+        this.name = name;
+    }
+
+    move(distance: number = 0) {
+        console.log(`${this.name} moved ${distance} meters.`);
+    }
+}
+
+class Dog extends Animal {
+    bark() {
+        console.log('Woof! Woof!');
+    }
+}
+
+const dog = new Dog('Buddy');
+dog.bark(); // 输出: Woof! Woof!
+dog.move(10); // 输出: Buddy moved 10 meters.
+```
+
+通过接口、函数重载、类与继承，TypeScript 提供了强大的面向对象编程能力，使得代码更加结构化和可维护。
+
+## 5.4 TS高级类型
+
+TypeScript 提供了一些高级类型，使得开发者可以更灵活地定义和操作类型。这些高级类型包括：
+
+### 5.4.1 联合类型（Union Types）
+
+联合类型表示一个值可以是几种类型之一。使用竖线 (`|`) 分隔每个类型。
+
+```typescript
+let value: string | number;
+value = "Hello"; // 合法
+value = 42; // 合法
+// value = true; // 非法
+```
+
+### 5.4.2 交叉类型（Intersection Types）
+
+```typescript
+交叉类型表示将多个类型合并为一个类型。使用与 (&) 运算符连接每个类型。
+
+interface Person {
+    name: string;
+}
+
+interface Employee {
+    employeeId: number;
+}
+
+type Staff = Person & Employee;
+
+let staffMember: Staff = {
+    name: "Alice",
+    employeeId: 1234
+};
+```
+
+### 5.4.3 类型断言（Type Assertions）
+
+类型断言用于手动指定一个值的类型。它可以通过两种方式实现：尖括号语法和 as 语法。
+
+```typescript
+let someValue: any = "this is a string";
+let strLength: number = (<string>someValue).length;
+
+let someValue2: any = "this is another string";
+let strLength2: number = (someValue2 as string).length;
+```
+
+### 5.4.4 类型别名（Type Aliases）
+
+类型别名用于为类型创建一个新名称。它可以用于原始值、联合类型、交叉类型以及任何你需要手动定义的类型。
+
+```typescript
+type StringOrNumber = string | number;
+
+let value1: StringOrNumber;
+value1 = "Hello"; // 合法
+value1 = 42; // 合法
+// value1 = true; // 非法
+```
+
+此外，在高级类型中，还有一个很重要的概念，那就是**泛型**。
+
+### 5.4.5 泛型（Generics）
+
+泛型（Generics）是 TypeScript 中的一种高级类型，用于在定义函数、类、接口时，支持多种类型。泛型可以增强代码的可重用性，使得代码更加灵活。
+
+```typescript
+function identity<T>(arg: T): T {
+    return arg;
+}
+
+let output = identity<string>("Hello, TypeScript!");
+console.log(output); // 输出: Hello, TypeScript!
+```
+
+![alt text](image-25.png)
+![alt text](image-26.png)
+![alt text](image-27.png)
+
+## 5.5 TS实战
+
+### 5.5.1 声明文件
+
+![alt text](image-28.png)
+
+### 5.5.2 泛型约束后端接口类型
+
+![alt text](image-29.png)
+
+# 6 Web标准与前端开发
+
+**建议：学习框架前去了解一下他们的作者，搞清楚在什么情境之下写了这个框架。**
+
+![alt text](image-31.png)
+![alt text](image-32.png)
+![alt text](image-33.png)
+
+roadmap.sh 这个网站可以看一下。
+
+![alt text](image-34.png)
+![alt text](image-35.png)
