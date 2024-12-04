@@ -420,3 +420,64 @@ roadmap.sh 这个网站可以看一下。
 
 ![alt text](image-34.png)
 ![alt text](image-35.png)
+
+# 7 HTTP实用指南
+
+*Restful API
+
+请求头与响应头（面试常考）
+![alt text](image-38.png)
+![alt text](image-39.png)
+
+强缓存、协商缓存（面试常考）
+![alt text](image-40.png)
+
+cookie
+![alt text](image-41.png)
+
+跨域：先options看看允不允许，获得允许后再发正式请求
+![alt text](image-46.png)
+
+SSO单点登录：一次点击即可登录所有该公司的网站
+
+两种鉴权方式：cookie、JWT
+
+浏览器内部发请求：XHR和fetch，fetch还支持promise
+
+axios拦截器
+
+用户体验：快、稳定性
+
+websocket 聊天室：不是HTTP协议
+
+# 8 Web开发的安全之旅
+
+## 攻击
+
+sql注入
+
+传输层攻击--中间人攻击
+
+![alt text](257e756d636838a4203a40bf6e750b9.jpg)
+
+## 防御
+
+samesite cookie
+
+防御csrf
+
+防注入：prepared statement
+
+# 9 前端设计模式应用
+
+## 9.1 前端设计模式概述
+
+用的最广的两个设计模式：单例模式、发布订阅模式
+
+## 9.2 JS三大设计模式
+
+原型模式、代理模式、迭代器模式
+
+## 9.3 前端框架的设计模式
+
+代理模式、组合模式
