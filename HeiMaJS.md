@@ -58,6 +58,8 @@ const li = document.querySelector('ul li:nth-child(2)');    // 获取第二个li
 
 **如果你还在纠结使用谁，我们就使用innerHTML。**
 
+**注意：它得不到表单元素的内容，表单在后面单独拿出来讲。**
+
 ### 5. 操作DOM元素属性
 
 #### 5.1 修改DOM元素常见属性
@@ -140,3 +142,15 @@ p.classList.remove('active');  // 通过classList删除类名
 // 切换类名
 p.classList.toggle('active');  // 通过classList切换类名 没有就加上 有就删掉
 ```
+
+#### 5.3 修改表单元素属性
+
+注意，当我们设置表单元素的值的时候，需要使用 `.value` 或者 `.type`，使用 `innerHTML` 往往取不到表单元素的值。
+
+![alt text](image-47.png)
+
+打勾
+checked只接受布尔值，隐式转换
+disabled控制按钮是否禁用
+
+属性和值相同只写一个就行，H5新规范
