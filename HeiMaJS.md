@@ -54,7 +54,7 @@ const li = document.querySelector('ul li:nth-child(2)');    // 获取第二个li
 
 #### 4.2 `innerHTML`属性
 
-`innerHTML`属性可以获取或设置元素的HTML内容，**可以获取标签内容。**
+`innerHTML`属性可以获取或设置元素的HTML内容，**可以获取标签内容。** 将字符串赋值给`innerHTML`时，需要通过引号包裹，例如`p.innerHTML = '<span>hello</span>'`。
 
 **如果你还在纠结使用谁，我们就使用innerHTML。**
 
@@ -180,3 +180,35 @@ let n = setInterval(fn, 1000);  // 开启定时器，1. fn不写括号 2. 必须
 clearInterval(n);   // 关闭定时器
 n = setInterval(fn, 1000);  // 重新打开定时器
 ```
+
+## Day2 DOM-事件基础：注册事件、tab栏切换
+
+### 1. 事件监听
+
+`addEventListener`是一个非常重要的方法，用来给元素绑定事件。语法：
+
+```javascript
+元素.addEventListener('事件名', function() {
+    // 事件处理程序
+});
+```
+
+![alt text](image-48.png)
+
+拓展：事件监听的版本：又L0~L4四个版本。
+
+![alt text](image-49.png)
+
+**绑定了事件监听之后，例如`.addEventListener('click', function(){})`，那么接下来可以在外面通过JS调用`element.click()`模拟点击。**
+
+### 2. 事件类型
+
+有鼠标触发、表单获得光标、键盘触发、表单输入触发等。
+
+![alt text](image-50.png)
+
+### 3. 事件对象
+
+事件对象是浏览器提供的一个对象，当事件发生时，会自动创建一个事件对象，这个对象中包含了当前事件的相关信息。
+
+`.addEventListener('click', function(event) {})`，**这里的`event`就是事件对象。**
