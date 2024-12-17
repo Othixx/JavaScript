@@ -207,8 +207,36 @@ n = setInterval(fn, 1000);  // 重新打开定时器
 
 ![alt text](image-50.png)
 
+**针对键盘一般更喜欢用`keyup`。**
+
 ### 3. 事件对象
 
 事件对象是浏览器提供的一个对象，当事件发生时，会自动创建一个事件对象，这个对象中包含了当前事件的相关信息。
 
 `.addEventListener('click', function(event) {})`，**这里的`event`就是事件对象。**
+
+**常用属性：**
+
+1. `event.type`：获取事件类型。
+2. `event.clientX / event.clientY`：获取鼠标在**浏览器可见窗口左上角**中的X/Y坐标。
+3. `event.offsetX / event.offsetY`：获取鼠标在**当前DOM元素左上角**中的X/Y坐标。
+4. `event.key`：获取键盘按键。
+
+**拓展：`trim`方法：**
+
+`trim`方法可以去掉字符串两端的空格，但是不会去掉中间的空格。示例：
+
+```javascript
+const str = '  hello world  ';
+console.log(str.trim());  // 'hello world'
+```
+
+### 4. 环境对象`this`
+
+`this`是一个非常重要的对象，它代表当前函数运行时所处的环境。
+
+判断`this`指向的粗略规则是：**谁调用，this就是谁。**
+
+### 5. 回调函数
+
+这里我们要求说出回调函数的定义：**把一个函数作为另外一个函数的参数传递，这个函数就叫回调函数。**
