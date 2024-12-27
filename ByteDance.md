@@ -487,3 +487,4 @@ samesite cookie
 ## 10.1 React 历史与应用
 
 React可以被用于网页的开发、同时通过React Native可以开发移动端应用，此外，通过Electron可以开发桌面应用。关于React的历史，React是由Facebook开发的，最早是用于Facebook的网页开发，后来开源出来，现在已经成为了前端开发中最流行的框架之一。
+
