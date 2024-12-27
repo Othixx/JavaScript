@@ -34,6 +34,12 @@ JavaScript = ECMAScript(JSC语言基础) + WebAPIs(BOM + DOM)
 const li = document.querySelector('ul li:nth-child(2)');    // 获取第二个li，这里元素的下标是从1开始的！
 ```
 
+**下面一段使用属性选择器，很重要：**
+
+```javascript
+const li = document.querySelector('ul li[data-index="2"]');    // 获取data-index为2的li
+```
+
 2. `document.querySelectorAll('css选择器')`：获取所有符合条件的元素，返回的是一个**伪数组**（NodeList对象集合）。**伪数组有长度`length`和索引号，但是没有`pop()` `push()`等数组方法。** 哪怕只有一个元素，只要用`qurerySelectorAll`就会返回一个伪数组。
 
 #### 其他获取DOM元素的方法
@@ -339,3 +345,49 @@ console.log(str.trim());  // 'hello world'
 **总结**
 
 ![alt text](image-59.png)
+
+### 4. 拓展：自执行函数
+
+自执行函数是指在定义后立即执行的函数，语法如下：
+
+```javascript
+(function() {
+    // 代码
+})();
+```
+
+下面为一个简单的案例：
+
+```javascript
+(function (param1, param2) {
+    console.log(param1 + ", " + param2);
+})("Hello", "World");   // 参数传递
+```
+
+自执行函数的作用：
+
+1. 防止变量污染。
+2. 用于模块化开发。
+
+## Day4 DOM节点、移动端滑动
+
+### 1. 日期对象
+
+#### 1.1 实例化
+
+有两种实例化方式：不指定日期/指定日期：
+
+```javascript
+const d = new Date();  // 不指定日期
+const d = new Date('2021-01-01');  // 指定日期
+```
+
+#### 1.2 日期对象方法
+
+![alt text](image-60.png)
+
+此外，我可以使用`date.toLocaleString()`来获取本地时间。还有`date.toLocaleDateString()`和`date.toLocaleTimeString()`，分别只获取日期和时间。
+
+#### 1.3 时间戳
+
+时间戳是指从1970年1月1日0时0分0秒到现在的毫秒数，可以通过`date.getTime()`或者`+new Date()`或者`Date.now()`来获取。选一个即可。
