@@ -313,3 +313,29 @@ console.log(str.trim());  // 'hello world'
 `scrollLeft`被卷去的左侧。
 
 ![alt text](image-55.png)
+
+**滚动到指定的坐标**
+
+除此之外我们可以采用`window.scrollTo(x, y);`滚动到指定的坐标。
+
+#### 3.3 页面尺寸事件
+
+`resize`事件，当页面尺寸发生变化时触发。
+
+**获取元素的可见部分边框**：`clientWidth`、`clientHeight`。
+
+![alt text](image-56.png)
+
+**获取元素的完整尺寸**：`offsetWidth`、`offsetHeight`。
+
+![alt text](image-57.png)
+
+**获取位置**：`offsetLeft`、`offsetTop`，这两个是只读属性，**最常用！**
+
+![alt text](image-58.png)
+
+`element.getBoundingClientRect()`：获取元素相对于**视口**的位置。（了解即可）
+
+**总结**
+
+![alt text](image-59.png)
