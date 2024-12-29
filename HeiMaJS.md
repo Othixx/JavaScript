@@ -391,3 +391,7 @@ const d = new Date('2021-01-01');  // 指定日期
 #### 1.3 时间戳
 
 时间戳是指从1970年1月1日0时0分0秒到现在的毫秒数，可以通过`date.getTime()`或者`+new Date()`或者`Date.now()`来获取。选一个即可。
+
+**时间戳转换为dd:hh:mm:ss的公式：**
+
+![alt text](image-66.png)

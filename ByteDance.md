@@ -484,7 +484,27 @@ samesite cookie
 
 # 10 响应式系统与React
 
+https://bytedance.larkoffice.com/file/boxcnGwsB2WwY2HZAp1XHvpnhoq
+
 ## 10.1 React 历史与应用
 
 React可以被用于网页的开发、同时通过React Native可以开发移动端应用，此外，通过Electron可以开发桌面应用。关于React的历史，React是由Facebook开发的，最早是用于Facebook的网页开发，后来开源出来，现在已经成为了前端开发中最流行的框架之一。
 
+## 10.2 React 的设计思路
+
+这节课，牛岱老师教我们直面JavaScript原生编程的痛点，一步一步推出了React是怎么来的。
+
+首先，针对UI编程，它不同于普通的“面向过程式编程”，会涵盖下面三个痛点。普通面向过程的编程往往是转换式系统，而针对UI的编程，我们需要设计一个响应式系统。
+
+![alt text](image-63.png)
+![alt text](image-62.png)
+
+其次，对于状态归属问题，提出了下面三个问题：
+
+![alt text](image-64.png)
+
+对于问题1的回答，React是单向数据流，永远是父亲向儿子传递数据，但这并不代表儿子不能改变父亲的值，比如说父亲可以向儿子传递一个函数，儿子调用这个函数就能改变父亲的值。
+
+对于问题2的回答，且听下回分解。对于问题3的回答，可以看看下面的组件化：
+
+![alt text](image-65.png)
