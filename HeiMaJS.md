@@ -395,3 +395,28 @@ const d = new Date('2021-01-01');  // 指定日期
 **时间戳转换为dd:hh:mm:ss的公式：**
 
 ![alt text](image-66.png)
+
+### 2. 节点操作
+
+#### 2.1 DOM 节点介绍
+
+![alt text](image-67.png)
+
+#### 2.2 查找节点
+
+本节主要是通过元素节点的关系进行查找。**以前是无脑获取节点，现在可以通过关系进行查找。**
+
+1. `parentNode`：获取父节点。
+2. `childNodes`只做了解，重点掌握`children`。
+![alt text](image-68.png)
+3. 兄弟关系查找：`previousElementSibling`、`nextElementSibling`。
+
+#### 2.3 增加节点（重要）
+
+**创建节点**
+
+`document.createElement('标签名')`：创建一个元素节点。
+
+**追加节点**
+
+![alt text](image-69.png)
