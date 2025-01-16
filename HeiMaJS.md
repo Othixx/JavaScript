@@ -448,3 +448,17 @@ const d = new Date('2021-01-01');  // 指定日期
 `form`表单的`autocomplete`属性，可以设置为`off`，这样就可以关闭表单的自动填充功能。
 
 `form`通过调用`reset()`方法可以重置表单。
+
+## Day5 Window对象、本地存储
+
+### 1. Window对象
+
+#### 1.1 BOM
+
+![alt text](image-71.png)
+
+#### 1.2 定时器——延时函数
+
+![alt text](image-72.png)
+
+`setTimeout`返回的是一个id，用来标注定时器的序号。
