@@ -462,3 +462,65 @@ const d = new Date('2021-01-01');  // 指定日期
 ![alt text](image-72.png)
 
 `setTimeout`返回的是一个id，用来标注定时器的序号。
+
+#### 1.3 JS 执行机制（面试经常考）
+
+JS是单线程的，JS会根据代码的特征，使用事件循环(event loop)机制来处理异步任务。如果是同步任务，放入执行栈中；如果是异步任务，提交给对应的异步进程进行处理，推入异步队列中。当执行栈中的所有任务执行完之后，JS会检查异步队列中是否有任务，如果有，就将其推入主线程中执行，待全部执行完之后，又回去检查同步的执行栈，如此循环我们称之为事件循环。
+
+![alt text](image-73.png)
+
+#### 1.4 location对象
+
+`location`对象是`window`对象的一个属性，用来获取或设置当前页面的URL信息。最重要的是我们要知道`location.href`可以获取当前页面的完整URL，对其赋值时，可以实现对页面的跳转。
+
+![alt text](image-74.png)
+
+#### 1.5 navigator对象和history对象
+
+`navigator`对象是浏览器提供的一个对象，用来获取浏览器的信息，例如浏览器的名称、版本、操作系统等。常用的方法是，通过浏览器UA检测浏览器的版本和平台：
+
+![alt text](image-75.png)
+
+`history`对象是浏览器提供的一个对象，用来操作浏览器的历史记录，例如`history.back()`可以返回上一页，`history.forward()`可以前进到下一页。和浏览器的前进后退功能键类似。
+
+### 2. 本地存储（重点）
+
+#### 2.1 localStorage和sessionStorage
+
+`localStorage`和`sessionStorage`都是浏览器提供的本地存储方案，用于在用户的浏览器中存储数据，它们的存储大小通常为5MB左右。
+
+- `localStorage`：数据永久存储，直到手动删除。
+- `sessionStorage`：数据仅在当前会话中有效，关闭页面后数据会被清除。
+
+![alt text](image-76.png)
+
+**请注意，`key`需要加引号，否则当作变量看，`value`会自动转换成字符串，理解是，本地存储只能存储字符串信息。**
+
+方法如下：
+
+```javascript
+// 存储数据
+localStorage.setItem('key', 'value');
+sessionStorage.setItem('key', 'value');
+
+// 获取数据
+const value1 = localStorage.getItem('key');
+const value2 = sessionStorage.getItem('key');
+
+// 删除数据
+localStorage.removeItem('key');
+sessionStorage.removeItem('key');
+```
+
+#### 2.2 存储复杂数据类型
+
+对于复杂数据类型（如对象、数组），我们需要先将其转换为字符串，再存储到本地存储中。可以使用`JSON.stringify()`将对象转换为JSON字符串，使用`JSON.parse()`将JSON字符串转换为对象。
+
+```javascript
+// 存储对象
+const user = { name: 'Alice', age: 25 };
+localStorage.setItem('user', JSON.stringify(user));
+
+// 获取对象
+const userStr = localStorage.getItem('user');
+const userObj = JSON.parse(userStr);
