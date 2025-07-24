@@ -524,3 +524,142 @@ localStorage.setItem('user', JSON.stringify(user));
 // 获取对象
 const userStr = localStorage.getItem('user');
 const userObj = JSON.parse(userStr);
+```
+
+### 拓展 数组中的`map`和`join`方法
+
+设计`map`方法的初衷，在于直接对数组中的每个元素都进行操作（这个和`forEach`方法类似），最关键的是，它能够返回一个新的数组。如下所示：
+
+```javascript
+const arr = [1, 2, 3];
+const newArr = arr.map(item => item * 2);  // 返回一个新的数组，每个元素都乘以2
+console.log(newArr);  // [2, 4, 6]
+```
+
+`join`方法的作用是将数组中的所有元素连接成一个字符串，默认使用逗号分隔，也可以指定分隔符。如下所示：
+
+```javascript
+const arr = [1, 2, 3];
+const str = arr.join('-');  // 使用'-'作为分隔符
+console.log(str);  // "1-2-3"
+```
+
+## Day6 正则表达式
+
+在JS中，正则表达式也是对象。我们学习到能看懂正则表达式即可。
+
+### 1. 正则表达式介绍及语法
+
+正则表达式是用于匹配字符串中字符组合的**模式**。使用起来很简单，先定义一个正则表达式，然后使用`test()`（或者`exec()`）方法来测试字符串是否匹配。
+
+```javascript
+const regex = /abc/;
+console.log(regex.test('abcdef'));  // true
+console.log(regex.test('123'));     // false
+```
+
+![alt text](image-77.png)
+
+### 2. 元字符
+
+元字符是正则表达式中的特殊字符，用于定义匹配规则。
+
+#### 2.1 边界符
+
+![alt text](image-78.png)
+
+最后面一句话很重要！如果是精确匹配，那么只有唯一的字符串满足匹配情况。例如下面例子中的“二哈”，只有一种情况符合。
+
+![alt text](image-79.png)
+
+#### 2.2 量词
+
+主要有下面四个：
+
+![alt text](image-80.png)
+![alt text](image-81.png)
+
+尤其要注意的是，`{m,n}`的逗号左右两边不能加空格！不能加空格！不能加空格！
+
+看看下面几个例子：
+
+![alt text](image-82.png)
+
+#### 2.3 字符类
+
+字符类用来定义一组字符的集合，看下面的总结和例子：
+
+![alt text](image-83.png)
+![alt text](image-84.png)
+
+除此之外，还有预定义类，指的是某些常见的简写方式：
+
+![alt text](image-85.png)
+
+但是实际上，在日常开发中，我们还是喜欢使用中括号的方式，因为它简单明了。有的时候在确实需要简写，且大家都明白的情况下，采用预定义类的简写。
+
+#### 2.4 修饰符
+
+修饰符约束正则执行的某些细节行为，如是否区分大小写、是否支持多行匹配等。一般情况下，我们记住下面两个：
+
+![alt text](image-86.png)
+
+有的时候，我们需要替换字符串中的某一部分，这样子`replace()`方法就派上用场了。它的语法是：
+
+```javascript
+str.replace(/正则表达式/, '替换的内容');
+```
+
+例如：
+
+```javascript
+const str = 'Hello World';
+const newStr = str.replace(/World/, 'JavaScript');
+console.log(newStr);  // Hello JavaScript
+```
+
+我们可以使用`g`修饰符来进行全局替换，使用`i`修饰符来进行不区分大小写的替换：
+
+```javascript
+const str = 'Hello World';
+const newStr = str.replace(/world/i, 'JavaScript');  // 不区分大小写
+console.log(newStr);  // Hello JavaScript
+const str2 = 'Hello world world';
+const newStr2 = str.replace(/world/g, 'JavaScript');  // 全局替换
+console.log(newStr2);  // Hello JavaScript
+```
+
+# Part 3 JS进阶部分
+
+## Day1 作用域、函数进阶、解构赋值
+
+### 1. 作用域（重点，面试常考）
+
+#### 1.1 局部作用域
+
+局部作用域包含下面两种：**函数作用域、块作用域**。函数作用域即变量在函数内声明，函数执行完毕后，函数内部的变量实际被清空了。
+![alt text](image-87.png)
+块作用域是指变量在`{}`中声明，只有在这个块内有效。注意，使用`let`和`const`声明的变量是会产生块作用域，而`var`声明的变量不会存在块作用域。
+![alt text](image-88.png)
+
+#### 1.2 全局作用域
+
+`<script>`标签和`.js`文件的【最外层】就是所谓的全局作用域，在此声明的变量在函数内部也可以被访问。此外，函数中声明的变量如果没有使用`var`、`let`、`const`等关键字声明，那么它也会被提升到全局作用域中。
+
+#### 1.3 作用域链
+
+**作用域链的本质是底层的变量查找机制**。作用域链是指在查找变量时，JS会先在当前作用域中查找，如果没有找到，就会去上一级作用域中查找，一直向上查找，直到找到全局作用域为止。
+
+![alt text](image-89.png)
+
+#### 1.4 垃圾回收机制
+
+![alt text](image-90.png)
+
+拓展：堆栈空间分配区别——①栈用来存放基本数据类型，由操作系统自动分配释放，例如函数的参数值、局部变量等；②堆用来存放复杂数据类型，例如对象、数组等，一般由程序员分配释放，**如果程序员不释放，那么由垃圾回收机制进行回收**。常见的垃圾回收算法有**引用计数算法、标记清除算法**等。
+![alt text](image-91.png)
+引用计数算法虽然简单，但是如果出现循环引用，那么就永远无法释放那块内存，导致内存泄漏。由此产生了标记清除算法（只保留能找到的，其他的全部回收）：
+![alt text](image-92.png)
+
+#### 1.5 闭包
+
