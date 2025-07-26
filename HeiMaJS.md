@@ -786,3 +786,76 @@ fn(1, 2, 3);  // 输出：[1, 2, 3]
 ![alt text](image-109.png)
 ![alt text](image-110.png)
 对最后一张图的理解：在对象方法中的箭头函数，`this`指向外部作用域，原因是**对象字面量不产生作用域**，所以最后一张图的`this`指向`window`，具体见：https://blog.csdn.net/2301_81854535/article/details/148829976
+
+### 3. 解构赋值（很重要）
+
+在这一部分，我们主要学习**数组解构和对象解构**。解构赋值是一种快速为变量赋值的简洁**语法**，本质上仍然是为变量赋值。
+
+#### 3.1 数组解构
+
+数组解构是将数组的**单元值**快速**批量**赋值给一系列变量的**简洁语法**，示例：
+
+```javascript
+const arr = [1, 2, 3];
+const [a, b, c] = arr;
+console.log(a, b, c);  // 1 2 3
+```
+
+数组解构的一大好处就是可以快速交换变量的值：
+
+```javascript
+let a = 1, b = 2;
+[a, b] = [b, a];
+console.log(a, b);  // 2 1
+```
+
+另外，补充一个细节，JS中有两种情况一定要加上分号：
+
+![alt text](image-111.png)
+
+此外，一共有6个特殊的细节，在此不整理建议直接看黑马PPT，总结如下：
+
+![alt text](image-112.png)
+
+#### 3.2 对象解构（太重要了）
+
+对象解构是将对象的**属性和方法**快速批量赋值给一系列变量的简洁语法。
+
+![alt text](image-113.png)
+
+如上图所示，需要注意的是，**解构赋值的变量名必须和对象的属性名一致**，否则会报错。当然，有的时候我们也需要在外面重命名变量，此种情况下可以使用冒号来重命名变量：
+
+```javascript
+const obj = { name: 'Alice', age: 25 };
+const { name: userName, age: userAge } = obj;
+console.log(userName, userAge);  // Alice 25
+```
+
+除此之外还有数组对象解构、多级对象解构，都比较简单。下面列举多级对象解构：
+
+![alt text](image-114.png)
+
+#### 3.3 补充知识点：`forEach`循环（重点）
+
+`forEach`循环是数组的一个方法，用来遍历数组中的每个元素。它接受一个回调函数作为参数，这个回调函数会在每个元素上执行。
+
+```javascript
+const arr = [1, 2, 3];
+arr.forEach((item, index) => {
+    console.log(item, index);  // 输出每个元素和索引
+});
+```
+
+需要注意的是，`forEach`循环不会返回新的数组，它只是对每个元素执行回调函数，并且回调函数中不需要`return`，而`map`方法会根据`return`的值生成一个新的数组。
+
+#### 3.4 补充知识点：筛选数组的`filter`方法
+
+`filter`方法是数组的一个方法，用来筛选出符合条件的元素，并返回一个新的数组。它接受一个回调函数作为参数，这个回调函数会在每个元素上执行，返回`true`表示保留该元素，返回`false`表示不保留。
+
+```javascript
+const arr = [1, 2, 3, 4, 5];
+const newArr = arr.filter((item) => {
+    return item > 2;
+});
+console.log(newArr);  // 输出：[3, 4, 5]
+```
