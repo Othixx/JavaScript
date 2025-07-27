@@ -859,3 +859,145 @@ const newArr = arr.filter((item) => {
 });
 console.log(newArr);  // 输出：[3, 4, 5]
 ```
+
+## Day2 构造函数、数据常用函数
+
+### 1. 深入对象
+
+之前我们学会了两种创建对象的方式，一种是字面量（`const obj = {}`）方式，另一种是`new Object()`方式。现在我们来学习构造函数的方式。
+
+#### 1.1 构造函数
+
+构造函数是一个特殊的函数，用来创建对象。**我们约定**，它的命名通常以大写字母开头，表示这是一个构造函数。使用`new`关键字调用构造函数时，会创建一个新的对象，并将其赋值给`this`。注意，构造函数的返回值是一个对象，它不需要写`return`语句。
+
+```javascript
+function Person(name, age) {
+    this.name = name;
+    this.age = age;
+}
+const person1 = new Person('Alice', 25);
+console.log(person1);  // 输出：{ name: 'Alice', age: 25 }
+```
+
+使用构造函数在创建对象时，会有下面四步（**面试常考**）：
+
+![alt text](image-115.png)
+
+#### 1.2 实例成员和静态成员
+
+![alt text](image-116.png)
+
+请看下面的例子：
+
+![alt text](image-117.png)
+![alt text](image-118.png)
+
+### 2. 内置构造函数
+
+#### 2.1 基本包装类型
+
+在JS中，基本数据类型（`string`、`number`、`boolean`）都有对应的内置构造函数，用来创建对象。它们的作用是将基本数据类型转换为对象类型。
+
+```javascript
+const str = new String('Hello');
+const num = new Number(123);
+const bool = new Boolean(true);
+```
+
+我们在实例化一个基本数据类型时，JS底层实际上为我们创造了一个基本包装类型的对象，才拥有了后期我们可以使用的各种方法，提高了我们的编程效率。
+
+#### 2.2 Object
+
+针对`Object`，我们学习它的三个常用静态方法：`Object.keys()`、`Object.values()`、`Object.assign()`。**静态方法是只能给构造函数使用的方法。**
+
+```javascript
+const obj = { a: 1, b: 2, c: 3 };
+console.log(Object.keys(obj));    // 获取对象的全部属性名，输出：["a", "b", "c"]
+console.log(Object.values(obj));  // 获取对象的全部属性值，输出：[1, 2, 3]
+const add = { d: 5 };
+const result = Object.assign(obj, add);
+console.log(result);               // 输出：{ a: 1, b: 2, c: 3, d: 5 }
+```
+
+#### 2.3 数组的`reduce`方法（稍微有些麻烦）
+
+`reduce`方法是数组的一个方法，用来对数组中的每个元素执行一个函数，并将结果汇总为单个值。它接受一个回调函数和一个初始值作为参数。**常用来计算数组的总和。**
+
+```javascript
+const arr = [1, 2, 3, 4, 5];
+const sum = arr.reduce((accumulator, currentValue) => {     // accumulator是上一个值（累加器），currentValue是当前值
+    return accumulator + currentValue;
+}, 0);      // 初始值为0
+console.log(sum);  // 输出：15
+```
+
+#### 2.4 数组的`find`、`every`、`Array.from`方法
+
+`find`方法用来查找数组中第一个满足条件的元素。它接受一个回调函数作为参数，返回第一个满足条件的元素，如果没有找到，则返回`undefined`。
+
+```javascript
+const arr = [1, 2, 3, 4, 5];
+const found = arr.find((item) => {
+    return item > 3;  // 查找第一个大于3的元素
+});
+console.log(found);  // 输出：4
+```
+
+`every`方法用来检查数组中的**所有**元素是否满足条件。它接受一个回调函数作为参数，如果所有元素都满足条件，则返回`true`，否则返回`false`。另外，如果是`some`方法，则只要有一个元素满足条件就返回`true`。
+
+```javascript
+const arr = [1, 2, 3, 4, 5];
+const allGreaterThanZero = arr.every((item) => {
+    return item > 0;  // 检查所有元素是否大于0
+});
+console.log(allGreaterThanZero);  // 输出：true
+```
+
+`Array.from`方法用来将类数组对象或可迭代对象或**伪数组**转换为**真数组**。它接受一个类数组对象或可迭代对象作为参数，并返回一个新的数组。
+
+```javascript
+const str = 'Hello';
+const arr = Array.from(str);
+console.log(arr);  // 输出：["H", "e", "l", "l", "o"]
+```
+
+#### 2.5 String
+
+掌握`String`的三个常用方法：`substring()`、`startsWith()`、`includes()`。
+
+```javascript
+const str = 'Hello World';
+console.log(str.substring(0, 5));  // 子字符串，输出：Hello
+console.log(str.startsWith('Hello'));  // 检查是否某个字符串开头，输出：true
+console.log(str.includes('World'));  // 检查是否包含某个字符串，输出：true
+```
+
+#### 2.6 Number.toFixed()
+
+`Number.toFixed()`方法用来将数字格式化为指定的小数位数，并返回一个字符串。它接受一个参数，表示小数点后保留的位数。
+
+```javascript
+const num = 3.14159;
+console.log(num.toFixed(2));  // 输出：3.14
+console.log(num.toFixed(4));  // 输出：3.1416
+```
+
+## Day3 深入面向对象
+
+### 1. 构造函数
+
+![alt text](image-119.png)
+
+为啥会浪费内存呢？因为每次调用构造函数都会创建一个新的对象，如果这些对象里面有很多共同的方法，那么就会重复实例化，浪费很多内存。
+
+### 2. 原型
+
+原型是JS中实现继承的核心概念。每个函数都有一个`prototype`属性，指向一个对象，这个对象就是该函数的原型。通过原型，我们可以将方法和属性共享给所有实例。也通过原型，我们可以实现方法的复用，节省内存空间。**固定属性写在构造函数中，固定方法写在原型对象中。**
+
+![alt text](image-120.png)
+
+构造函数和原型对象中的`this`指向谁？都是**实例对象**。
+
+![alt text](image-121.png)
+如上图所示，构造函数的比较好理解，原型对象的`this`之所以也指向实例对象，是因为原型方法是通过**实例对象**调用的。谁调用了它，实例对象就指向谁。
+
