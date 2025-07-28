@@ -1001,3 +1001,160 @@ console.log(num.toFixed(4));  // 输出：3.1416
 ![alt text](image-121.png)
 如上图所示，构造函数的比较好理解，原型对象的`this`之所以也指向实例对象，是因为原型方法是通过**实例对象**调用的。谁调用了它，实例对象就指向谁。
 
+#### 2.1 `constructor`属性
+
+`constructor`属性是指向构造函数的一个属性。每个**原型对象**里都有一个`constructor`属性，指向它的构造函数。我们在给原型添加多个公共方法时，需要使用`constructor`属性指回原来的构造函数。否则的话相当于原型被一个新的对象覆盖，导致原型链断裂。
+
+![alt text](image-123.png)
+![alt text](image-122.png)
+
+#### 2.2 `__proto__`（对象原型）属性
+
+`__proto__`属性是指向对象原型的一个属性。每个实例对象都有一个`__proto__`属性，指向它的原型对象（`prototype`）。
+
+简记：**对象原型指向原型对象。**
+
+![alt text](image-124.png)
+
+但是，在有些浏览器中，实际会显示`[[Prototype]]`，这只是浏览器的显示方式不同而已：
+![alt text](image-125.png)
+最后一句话是很重要的，`__proto__`对象原型里面也有一个`constructor`属性，指向它的（创建该实例对象的）构造函数，看图：
+![alt text](image-126.png)
+
+#### 2.3 原型继承
+
+在实际中，有很多类需要共有某些共同属性和方法，为了避免重复代码，我们可以使用原型继承的方式进行实现。请看下面的写法：
+
+![alt text](image-127.png)
+请注意，公共的部分一定要写在构造函数里面，然后`new`一个出来，这样的目的是为了让不同的子类能够继承公共部分，同时又能有自己的独特部分。完事之后，缺失的`constructor`属性需要手动指回。
+
+#### 2.4 原型链（高频面试题）与`instanceof`
+
+原型链是指通过`__proto__`属性连接起来的多个原型对象形成的链条。每个对象都有一个`__proto__`属性，指向它的**原型对象**。如图所示：
+
+![alt text](image-128.png)
+记住这句话：**每个对象实例都有一个`__proto__`属性，指向它的原型对象；每个原型对象都有一个`constructor`属性，指向它的构造函数。**
+
+![alt text](image-129.png)
+基于原型链的查找规则，面试可能会问。此外，`instanceof`运算符可以用来判断一个对象是否是某个构造函数的实例。它的语法是：`obj instanceof Constructor`。
+
+```javascript
+const obj = new Person('Alice', 25);
+console.log(obj instanceof Person);  // 输出：true
+console.log(obj instanceof Object);  // 输出：true
+```
+
+## Day4 高阶技巧
+
+### 1. 深浅拷贝
+
+对于深拷贝和浅拷贝，只针对引用类型。
+
+#### 1.1. 浅拷贝
+
+浅拷贝是指只复制对象的第一层属性，如果属性是引用类型，则只复制引用地址。可以使用`Object.assign()`方法或展开运算符`...`来实现浅拷贝。
+
+![alt text](image-130.png)
+问题就是，如果原对象的有某些属性是引用类型，那么拷贝后的新对象和原对象的那些属性仍然指向同一个内存地址，修改新对象的属性仍旧会影响原对象。
+
+#### 1.2 深拷贝（面试常考）
+
+我们有常见的三种方式实现深拷贝：①手写递归实现深拷贝；②`lodash`库的`cloneDeep()`方法；③使用`JSON.parse(JSON.stringify(obj))`。
+
+##### 1.2.1 手写递归实现深拷贝
+
+其实很easy，我们逐级展开，首先需要写一个浅拷贝（类似`Object.assign()`的底层实现）：
+
+```javascript
+const o = {};
+function deepCopy(newObj, oldObj) {
+    for (let k in oldObj) {     // 遍历对象用for in，k是属性名，oldObj[k]是属性值
+        newObj[k] = oldObj[k];  // 浅拷贝
+    }
+}
+deepCopy(o, obj);
+```
+
+接下来，我们先考虑原对象中含有数组的情况，再考虑对象中含有对象的情况，至于为什么这么实现，我们待会儿解释。我们对原函数改进，使用递归进行实现：
+
+```javascript
+const o = {};
+function deepCopy(newObj, oldObj) {
+    for (let k in oldObj) {     // 遍历对象用for in，k是属性名，oldObj[k]是属性值
+        if (oldObj[k] instanceof Array) {
+            newObj[k] = [];  // 如果是数组，先创建一个新数组
+            deepCopy(newObj[k], oldObj[k]);  // 递归拷贝数组元素
+        }
+        else {
+            newObj[k] = oldObj[k];  // 浅拷贝
+        }
+    }
+}
+deepCopy(o, obj);
+```
+
+以上就实现了对数组进行递归深拷贝的方法，接下来我们再考虑对象中含有对象的情况：
+
+```javascript
+const o = {};
+function deepCopy(newObj, oldObj) {
+    for (let k in oldObj) {     // 遍历对象用for in，k是属性名，oldObj[k]是属性值
+        if (oldObj[k] instanceof Array) {
+            newObj[k] = [];  // 如果是数组，先创建一个新数组
+            deepCopy(newObj[k], oldObj[k]);  // 递归拷贝数组元素
+        }
+        else if (oldObj[k] instanceof Object) {
+            newObj[k] = {};  // 如果是对象，先创建一个新对象
+            deepCopy(newObj[k], oldObj[k]);  // 递归拷贝对象属性
+        }
+        else {
+            newObj[k] = oldObj[k];  // 浅拷贝
+        }
+    }
+}
+deepCopy(o, obj);
+```
+
+那么问题来了，为什么需要先考虑数组的情况，再考虑对象的情况呢？这是因为在 JavaScript 中，数组也是对象的一种特殊形式，因此我们需要先处理数组的拷贝逻辑，确保能够正确地拷贝包含数组的对象。否则如果先把数组当成了对象，那么就没法正确拷贝数组了。
+
+上面的深拷贝即为最简单的深拷贝方式。需要注意的是，这种拷贝方式没办法实现对象和数组交叉组合的情况，例如对象中含有数组，数组中含有对象的情况。对于这种情况，我们可以使用`lodash`库的`cloneDeep()`方法来实现深拷贝。
+
+##### 1.2.2 `lodash`库的`cloneDeep()`方法
+
+`lodash`是一个非常流行的 JavaScript 工具库，提供了很多实用的函数，包括深拷贝。使用`lodash`的`cloneDeep()`方法可以轻松实现深拷贝。
+
+```javascript
+const _ = require('lodash');  // 引入lodash库
+const obj = { a: 1, b: { c: 2 } };
+const newObj = _.cloneDeep(obj);  // 深拷贝
+console.log(newObj);  // 输出：{ a: 1, b: { c: 2 } }
+```
+
+##### 1.2.3 使用`JSON.parse(JSON.stringify(obj))`
+
+这种方式是最简单的深拷贝方式。先转为JSON字符串，再转换回去。
+
+```javascript
+const obj = { a: 1, b: { c: 2 } };
+const newObj = JSON.parse(JSON.stringify(obj));  // 深拷贝
+console.log(newObj);  // 输出：{ a: 1, b: { c: 2 } }
+```
+
+### 2. 异常处理
+
+#### 2.1 `throw`抛异常
+
+![alt text](image-131.png)
+请注意，使用`throw`会终止后面的程序。此外如果`throw`后面直接跟字符串也可以，只不过我们使用`Error`对象更好一些，因为它可以提供更多的错误信息。
+
+#### 2.2 `try...catch`捕获异常
+
+![alt text](image-132.png)
+
+请注意，哪怕在`catch`语句块中我们使用`throw`抛出了异常，程序也不会停止执行。如果想要终止程序执行，我们需要在`catch`语句块的最末尾加上`return`。同时`finally`语句仍会执行，而且`finally`语句块无论有没有错误它都会执行。
+
+#### 2.3 `debugger`调试
+
+`debugger`是一个关键字，用来在代码中设置断点。当代码执行到`debugger`语句时，程序会暂停执行，并进入调试模式。我们可以在浏览器的开发者工具中查看变量的值、调用栈等信息。
+
+![alt text](image-133.png)
