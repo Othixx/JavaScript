@@ -1158,3 +1158,60 @@ console.log(newObj);  // 输出：{ a: 1, b: { c: 2 } }
 `debugger`是一个关键字，用来在代码中设置断点。当代码执行到`debugger`语句时，程序会暂停执行，并进入调试模式。我们可以在浏览器的开发者工具中查看变量的值、调用栈等信息。
 
 ![alt text](image-133.png)
+
+### 3. 处理`this`
+
+#### 3.1 `this`指向
+
+对于普通函数：
+
+![alt text](image-135.png)
+![alt text](image-134.png)
+
+对于箭头函数：
+
+![alt text](image-136.png)
+![alt text](image-137.png)
+![alt text](image-138.png)
+![alt text](image-139.png)
+
+#### 3.2 改变`this`指向
+
+##### 3.2.1 `call`方法
+
+![alt text](image-140.png)
+
+##### 3.2.2 `apply`方法
+
+`apply`方法和`call`方法类似，区别在于`apply`方法接受**一个数组**作为参数，而`call`方法接受多个参数。
+
+![alt text](image-141.png)
+
+我们可以使用`apply`方法来求一个数组的最大值（最小值）：
+
+```javascript
+const arr = [1, 2, 3, 4, 5];
+const max = Math.max.apply(null, arr);  // 使用apply方法求最大值
+console.log(max);  // 输出：5
+```
+
+之所以使用`null`作为第一个参数，是因为`Math.max`函数并不需要`this`指向任何对象，而只是为了让数组能够直接传入`Math.max`函数（不需要展开运算符）。
+
+##### 3.2.3 `bind`方法
+
+`bind`方法用于创建一个新的函数，这个函数在调用时会将`this`绑定到指定的对象上。它返回一个新的函数，而不是立即执行，**这是它和前两种方法最大的区别**。
+
+```javascript
+const obj = {
+    name: 'alice',
+    greet: function() {
+        console.log(this);
+    }
+}
+const greetAlice = obj.greet.bind(obj);
+greetAlice(); // Outputs: { name: 'alice', greet: [Function: greet] }
+```
+
+**常见的使用场景是，它可以改变定时器内部的`this`指向。**
+
+### 4. 性能优化

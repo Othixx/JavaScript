@@ -6,15 +6,19 @@
     <title>Document</title>
 </head>
 <body>
+    <input type="text">
     <script>
-        const Person = function(name, age) {
-            this.name = name;
-            this.age = age;
-        };
-        const o = new Person('John', 30);
-        console.log(o);
-        console.log(Person.prototype);
-        
+        let oInput = document.querySelector('input');
+        let t = null;
+        oInput.addEventListener('input', function() {
+            if (t) {
+                clearTimeout(t);  // 清除之前的定时器
+            }
+            t = setTimeout(() => {
+                console.log(this.value);  // 输出输入框的值
+            }, 1000);
+            // console.log(this.value);  // 输出输入框的值
+        });
     </script>
 </body>
 </html>
