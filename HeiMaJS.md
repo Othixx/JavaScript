@@ -1215,3 +1215,109 @@ greetAlice(); // Outputs: { name: 'alice', greet: [Function: greet] }
 **常见的使用场景是，它可以改变定时器内部的`this`指向。**
 
 ### 4. 性能优化
+
+主要包括防抖和节流：
+![alt text](image-142.png)
+
+#### 4.1 防抖（debounce）
+
+所谓防抖，就是指触发事件后在n秒内函数只能执行一次，如果在n秒内又触发了事件，则会重新计算函数执行时间。
+
+有两种常见的方式可以实现防抖，一种是调用`lodash`库的`debounce`方法，另一种是手写防抖函数。我们先来看下调用`lodash`库的`debounce`方法：
+
+```javascript
+const _ = require('lodash');
+const input = document.getElementById('input');
+const debouncedInput = _.debounce((event) => {
+    console.log(event.target.value);
+}, 300);  // 300毫秒内只执行一次
+input.addEventListener('input', debouncedInput);
+```
+
+`debounce`方法接受两个参数，第一个是要执行的函数，第二个是延迟时间（毫秒）。在上面的例子中，当用户输入时，只有在300毫秒内没有新的输入事件发生，才会执行回调函数。
+
+接着，我们来详细解读手写防抖函数。我们从最简单的思路开始：如果我们要手动实现它，那么需要用到定时器，如果在规定的时间内又触发了事件，我们只需要将定时器清空即可。可以有如下的代码：
+
+```javascript
+let oInput = document.querySelector('input');
+let t = null;
+oInput.oninput = function() {
+    if (t !== null) {
+        clearTimeout(t);  // 清除上一个定时器
+    }
+    t = setTimeout(() => {
+        console.log(this.value);
+    }, 1000);  // 1000毫秒后执行
+}
+```
+
+这样子我们就实现了最基本的防抖，如果在规定的时间内重复调用，那么定时器会被清除，只有最后一次调用会在1000毫秒后执行。但是这样的写法有个问题，就是业务代码和定时器代码混在了一起，不利于后期的维护，且`t`是一个全局变量，非常不好，我们需要采用闭包的形式，将它封装成一个函数：
+
+```javascript
+let oInput = document.querySelector('input');
+oInput.oninput = debounce();
+function debounce() {
+    let t = null;  // 定时器变量
+    return function() {
+        if (t !== null) {
+            clearTimeout(t);  // 清除上一个定时器
+        }
+        t = setTimeout(() => {
+            console.log(this.value);
+        }, 1000);  // 1000毫秒后执行
+    }
+}
+```
+
+现在我们已经封装成函数了。**理解这段代码很重要**。首先代码从上往下执行，运行到`oInput.oninput = debounce();`时，`debounce()`函数被调用，返回一个新的函数，这个函数被赋值给`oInput.oninput`。当用户输入时，实际上执行的是这个新的函数。**请注意，`debounce()`函数只会执行一次，但是它返回的函数可能会被多次调用，并且定时器变量在`debounce()`执行时就被初始化，存在`debounce()`函数的作用域中。**
+
+上面我们已经实现了函数形式的防抖，为了更好的使用，我们将业务代码`console.log()`部分封装成另一个函数`fn`，将延时的具体时间变成一个参数`delay`，于是得到了下面的形式：
+
+```javascript
+let oInput = document.querySelector('input');
+oInput.oninput = debounce(function() {
+    console.log(this.value);
+}, 1000);  // 1000毫秒后执行
+function debounce(fn, delay) {
+    let t = null;  // 定时器变量
+    return function() {
+        if (t !== null) {
+            clearTimeout(t);  // 清除上一个定时器
+        }
+        t = setTimeout(() => {
+            fn();  // 执行传入的函数
+        }, delay);  // 延迟时间
+    }
+}
+```
+
+但是这么写仍旧会有问题，原因出在`fn()`函数中，`this`指向的是`window`对象，而不是输入框对象。我们需要将`this`绑定到输入框对象上，可以使用`call()`方法来实现：
+
+```javascript
+let oInput = document.querySelector('input');
+oInput.oninput = debounce(function() {
+    console.log(this.value);
+}, 1000);  // 1000毫秒后执行
+function debounce(fn, delay) {
+    let t = null;  // 定时器变量
+    return function() {
+        if (t !== null) {
+            clearTimeout(t);  // 清除上一个定时器
+        }
+        t = setTimeout(() => {
+            fn.call(this);  // 使用call绑定this
+        }, delay);  // 延迟时间
+    }
+}
+```
+
+按照上面几步，最终完成了一个防抖函数的书写。
+
+#### 4.2 节流（throttle）
+
+节流是指在一定时间内只允许函数执行一次，如果在这段时间内又触发了事件，则会忽略掉。节流可以用来限制函数的执行频率，避免频繁触发事件导致性能问题。和防抖一样，同样可以使用`lodash`库的`throttle`方法或手写节流函数来实现。在这里省略调库的方法，我们直接看手写：
+
+![alt text](image-144.png)
+![alt text](image-143.png)
+
+有了防抖的基础之后，上面的代码就很好理解了。**需要注意的是，我们清空定时器的时候必须写成`timer = null`的形式而不能是`clearTimeout(timer)`，是因为我们的这句话写在`setTimeout()`的回调函数中，如果直接调用`clearTimeout(timer)`，那么会无法正确清除定时器。**
