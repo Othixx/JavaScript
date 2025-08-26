@@ -663,3 +663,12 @@ vuex 同样遵循单向数据流，组件中不能直接修改仓库的数据。
 
 ![alt text](image-314.png)
 
+## 8 vue 分模块
+
+Vue 拆分 module 的目的是为了让中大型项目变得更好维护。由于 vuex 使用**单一状态树**，应用的所有状态会集中到一个比较大的对象。当应用变得非常复杂时，store 对象就有可能变得相当臃肿。
+
+所以，我们会根据功能将 store 拆分成模块（module）。每个模块拥有自己的 state、getters、mutations 以及 actions，甚至是嵌套子模块。
+
+![alt text](image-310.png)
+
+如图所示，我们在`store`文件夹下新建一个`modules`文件夹，然后在该文件夹中创建不同的模块文件，比如说`count.js`和`person.js`。在每个模块文件中，定义该模块的 state、getters、mutations 以及 actions。最后，在`index.js`中通过`modules`选项将这些模块进行注册。
