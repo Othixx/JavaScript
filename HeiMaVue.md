@@ -853,3 +853,63 @@ Vue3中的生命周期函数相比于Vue2有一丝丝的不同，但是都很有
 `defineOptions`是Vue3.3新引入的一个编译器宏，用于在`<script setup>`语法糖中定义组件的选项（因为在这个语法糖里不能去定义其他平级的东西比如props或者options），比如说组件的名称、继承的属性等。
 
 ![alt text](image-349.png)
+
+### 5.2 defineModel
+
+![alt text](image-350.png)
+
+这一部分还不是很懂，暂时先留着。
+
+# Day12 Pinia 入门
+
+## 1 什么是 Pinia？
+
+![alt text](image-351.png)
+
+对于如何安装 Pinia，请参考官方文档。
+
+## 2 Pinia 基本使用
+
+![alt text](image-353.png)
+
+![alt text](image-354.png)
+
+我们在`src`目录下新建一个`stores`文件夹，然后在该文件夹中创建不同的模块文件，比如说`counter.js`。在每个模块文件中，定义该模块的 state、getters等。最后，在`main.js`中通过`app.use(pinia)`将 Pinia 注册到 Vue 应用中。
+
+![alt text](image-352.png)
+
+上图中展示我们在配置完了 Pinia 之后，如何在组件中使用 Pinia(store和action)。上面的定义Store部分写在`counter.js`中，下面的使用Store部分写在组件中。
+
+![alt text](image-355.png)
+
+上图中则展示了计算属性的实现方式。
+
+## 3 Pinia 异步请求
+
+异步action函数的写法和组件中获取异步数据的写法完全一致，无需要像Vuex一样，通过actions再传递到mutations中，来实现异步操作。
+
+![alt text](image-356.png)
+
+如图所示，直接在action中使用`async/await`语法即可。
+
+## 4 解构 store 造成的响应式丢失问题
+
+在组件中使用 Pinia 时，如果我们对 store 进行了解构赋值，那么会导致响应式丢失的问题。为了解决这个问题，我们可以使用`storeToRefs`辅助函数来保持响应式。**当然了，如果我们不需要使用状态，而使用里面的方法时，可以直接进行解构（因为不需要响应式）**。
+
+![alt text](image-357.png)
+
+![alt text](image-360.png)
+
+上图为官方文档中的说明。
+
+详解：为什么会丢失响应式？
+
+实际上，Pinia 的官网中提到了下面这句话：
+
+![alt text](image-358.png)
+
+好家伙，使用`reactive`包装的对象不能解构吗？于是我又去查了`reactive`的文档，发现确有此事：
+
+![alt text](image-359.png)
+
+最后官方甚至还说了句，建议使用`ref`作为声明响应式状态的主要API。我很不理解，既然这样，那么官方为什么还要采用`reactive`来实现`store`呢？我觉得这可能是一个设计上的缺陷吧，不知道在未来会不会修正。
