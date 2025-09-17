@@ -862,6 +862,8 @@ Vue3中的生命周期函数相比于Vue2有一丝丝的不同，但是都很有
 
 # Day12 Pinia 入门
 
+![alt text](image-362.png)
+
 ## 1 什么是 Pinia？
 
 ![alt text](image-351.png)
@@ -913,3 +915,11 @@ Vue3中的生命周期函数相比于Vue2有一丝丝的不同，但是都很有
 ![alt text](image-359.png)
 
 最后官方甚至还说了句，建议使用`ref`作为声明响应式状态的主要API。我很不理解，既然这样，那么官方为什么还要采用`reactive`来实现`store`呢？我觉得这可能是一个设计上的缺陷吧，不知道在未来会不会修正。
+
+## 5 Pinia 持久化插件
+
+![alt text](image-361.png)
+
+如图所示，使用`pinia-plugin-persistedstate`插件，可以实现 Pinia 的持久化存储功能。安装好插件之后，在`main.js`中引入并使用该插件。然后，在需要持久化的 store 中，添加`persist: true`选项即可。
+
+具体参见官方文档。
