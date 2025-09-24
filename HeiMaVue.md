@@ -923,3 +923,148 @@ Vue3中的生命周期函数相比于Vue2有一丝丝的不同，但是都很有
 如图所示，使用`pinia-plugin-persistedstate`插件，可以实现 Pinia 的持久化存储功能。安装好插件之后，在`main.js`中引入并使用该插件。然后，在需要持久化的 store 中，添加`persist: true`选项即可。
 
 具体参见官方文档。
+
+# Vue3 大事件项目
+
+接口地址 https://fe-bigevent-web.itheima.net/
+
+## pnpm 包管理器
+
+在大事件项目的第一步，我们需要认识一个包管理器pnpm，它是一个快速、节省空间的包管理器，类似于npm和yarn。它通过硬链接和符号链接来共享依赖包，从而节省磁盘空间和提高安装速度。后续我们都使用pnpm来管理。
+
+![alt text](image-365.png)
+
+## 配置ES-lint 和 Prettier
+
+这里面的配置和pdf中的不太一样，因为现在软件包在不断的更新迭代。在我的版本下，和视频中不同，我们需要同时安装vs-code里的 ESLint 和 Prettier 插件，并全部启用它。
+
+其中对于ES-Lint的配置如下：
+
+```json
+// 保存时自动修复ESlint
+"editor.codeActionsOnSave": {
+    "source.fixAll": "explicit"
+},
+// 关闭保存自动格式化
+"editor.formatOnSave": false
+```
+
+此外，对于项目目录下的`.prettierc.json`文件进行如下配置：
+
+```json
+{
+  "$schema": "https://json.schemastore.org/prettierrc",
+  "semi": false,
+  "singleQuote": true,
+  "printWidth": 100,
+  "trailingComma": "none",
+  "endOfLine": "auto"
+}
+```
+
+在执行最后一个配置前，我们要先确保项目中安装了`eslint-config-prettier`和`eslint-plugin-prettier`包。最后还要配置一个`eslint.config.js`文件，它也在项目根目录下：
+
+```js
+// 首先导入相应的包
+import prettier from 'eslint-config-prettier'
+import prettierPlugin from 'eslint-plugin-prettier'
+
+// 其次在defineConfig的最末尾添加上下面的配置：
+  prettier,
+
+  // 确保最终生效（覆盖掉 skipFormatting 的关闭）
+  {
+    plugins: { prettier: prettierPlugin },
+    rules: {
+      'prettier/prettier': 'warn',
+      'vue/multi-word-component-names': [
+        'warn',
+        {
+          ignores: ['index'] // vue组件名称多单词组成（忽略index.vue）
+        }
+      ],
+      'vue/no-setup-props-destructure': ['off'], // 关闭 props 解构的校验
+      // 💡 添加未定义变量错误提示，create-vue@3.6.3 关闭，这里加上是为了支持下一个章节演示。
+      'no-undef': 'error'
+    }
+  }
+```
+
+配置完成之后，ES lint 和 Prettier 就可以协同工作了，自动修复并展示我们的代码格式问题。
+
+## 提交前做代码检查
+
+但是有的时候，我们没法避开就是写错了代码，没有注意格式问题，一旦提交了上去，可能会导致严重的后果。这个时候我们可以使用`husky`和`lint-staged`来在提交代码前进行代码检查和格式化。这样子可以确保我们提交的代码符合规范，避免一些低级错误。
+
+![alt text](image-366.png)
+
+但是正如图中所说，`pnpm lint`是一个全量检查，会检查仓库下所有的代码，十分耗时。因此我们可以改用`lint-staged`来进行代码检查和格式化。它只会检查我们本次提交的代码，速度更快。
+
+![alt text](image-367.png)
+
+## Vue-router 4 路由代码解析
+
+在Vue3中，我们用的是Vue-router 4版本，和Vue-router 3版本有些许不同。主要发生了如下图所示的变化：
+
+![alt text](image-363.png)
+
+![alt text](image-364.png)
+
+除此之外呢，`import.meta.env`是Vite提供的一个环境变量对象，用于在代码中访问环境变量。具体如何修改，参见图中文档地址。
+
+## Pinia 构建仓库和持久化
+
+用Pinia构建仓库，很简单不用说，但是持久化的话，我们需要再安装一个`pinia-plugin-persistedstate`插件。
+
+https://prazdevs.github.io/pinia-plugin-persistedstate/zh/guide/ 这里面有详细的配置说明，因此不再赘述。
+
+## Pinia 仓库统一管理
+
+在管理Pinia仓库时，我们希望做到：
+1. Pinia独立维护：将原目录`main.js`包含Pinia的相关代码全都存储到`store/index.js`中
+2. 仓库统一导出
+
+![alt text](image-368.png)
+
+实现方法如上图所示，下面说说具体细节：
+
+1. 在`stores`文件夹下面新建`index.js`文件，作为Pinia的统一出口。接着将`main.js`中关于Pinia的相关代码全部搬到`stores/index.js`中。
+
+```js
+// stores/index.js
+// 请注意，假设我们在这里使用了持久化插件
+import { createPinia } from 'pinia'
+import persist from 'pinia-plugin-persistedstate'
+
+const pinia = createPinia()
+pinia.use(persist)
+
+export default pinia
+```
+```js
+// main.js
+// ...
+import pinia from '@/stores'
+// ...
+app.use(pinia)
+```
+
+2. 实现仓库的统一导出。现在我们需要在`stores`文件夹下新建一个`modules`文件夹，然后在该文件夹中创建不同的模块文件，比如说`counter.js`。然后，在`stores/index.js`中对这些文件进行注册。有下面几种方式
+
+```js
+// stores/index.js
+// 方式一：手动按需导入和注册
+// ...
+import { useCounterStore } from './modules/counter'
+export { useCounterStore }
+```
+
+```js
+// stores/index.js
+// 方式二：全部导出
+// ...
+export * from './modules/counter'  // 这一句话顶上面这种方式的两句话，并且还要强大，因为它可以将counter.js下面的所有Store都全部导出
+```
+
+至此，我们实现了Pinia仓库的统一管理。
+
