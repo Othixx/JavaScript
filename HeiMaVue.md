@@ -1012,6 +1012,10 @@ import prettierPlugin from 'eslint-plugin-prettier'
 
 除此之外呢，`import.meta.env`是Vite提供的一个环境变量对象，用于在代码中访问环境变量。具体如何修改，参见图中文档地址。
 
+## 引入 element-ui 组件库
+
+这一步旨在加入element-plus组件。我们为了节省打包大小，使用按需导入。详细配置方法参看完整笔记。
+
 ## Pinia 构建仓库和持久化
 
 用Pinia构建仓库，很简单不用说，但是持久化的话，我们需要再安装一个`pinia-plugin-persistedstate`插件。
@@ -1070,4 +1074,32 @@ export * from './modules/counter'  // 这一句话顶上面这种方式的两句
 
 ## 配置axios
 
-为了配置后面的一些路由，以及与后端进行数据交互，我们需要在项目里配置好axios。
+为了配置后面的一些路由，以及与后端进行数据交互，我们需要在项目里配置好axios。**一般的项目开发中，都会将axios封装成一个插件，以便在整个项目中使用**。一般呢，我们会配置下面的一些选项：
+
+![alt text](image-369.png)
+
+先安装axios：
+
+```bash
+pnpm add axios
+```
+
+详细的配置方法见原笔记。
+
+## 首页整体路由设计
+
+配置完了上面的东西后，我们需要对整个网站的页面之间的逻辑列个框架，而不是说就直接开始写代码。这个时候我们会需要对整体路由进行设计。
+
+![alt text](image-370.png)
+
+个人感觉这个其实是需求分析里面的一些内容。
+
+## 构建登录注册页面
+
+对于该页面的静态结构，我们使用element-plus来搭建，会使用到里面的一些图标库和组件。我们需要安装element-plus图标库：
+
+```bash
+pnpm i @element-plus/icons-vue
+```
+
+接着，按照完整笔记以及element-plus官网的说明，可以配置好静态的登录注册页面。接下来我们配置注册页的一些规则。
