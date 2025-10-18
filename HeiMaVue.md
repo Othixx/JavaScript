@@ -1102,4 +1102,153 @@ pnpm add axios
 pnpm i @element-plus/icons-vue
 ```
 
-接着，按照完整笔记以及element-plus官网的说明，可以配置好静态的登录注册页面。接下来我们配置注册页的一些规则。
+接着，按照完整笔记以及element-plus官网的说明，可以配置好静态的登录注册页面。接下来我们配置注册页的一些规则，也就是实现**注册校验**。
+
+有时候我们要保证输入的用户名和密码是不是符合相应的一些规则。比如说，用户名必须是字母开头，长度在3到10之间，只能包含字母和数字；密码必须包含数字、字母和特殊字符，长度在6到12之间。这就需要通过注册校验来完成。
+
+实现注册校验，我们需要绑定下面四步，现在分别来实现：
+
+- ①model 属性绑定 form 数据对象
+- ②v-model 绑定 form 数据对象的子属性
+- ③rules 配置校验规则
+- ④prop 绑定校验规则
+
+下面来给出具体实现方法：
+
+1. model 属性绑定 form 数据对象
+
+```jsx
+const formModel = ref({
+  username: '',
+  password: '',
+  repassword: ''
+})
+
+<el-form :model="formModel" >
+```
+
+2. v-model 绑定 form 数据对象的子属性
+
+```jsx
+<el-input
+  v-model="formModel.username"
+  :prefix-icon="User"
+  placeholder="请输入用户名"
+></el-input>
+... 
+(其他两个也要绑定)
+```
+
+3. rules 配置校验规则
+
+```jsx
+<el-form :rules="rules" >
+    
+const rules = {
+  username: [
+    { required: true, message: '请输入用户名', trigger: 'blur' },
+    { min: 5, max: 10, message: '用户名必须是5-10位的字符', trigger: 'blur' }
+  ],
+  password: [
+    { required: true, message: '请输入密码', trigger: 'blur' },
+    {
+      pattern: /^\S{6,15}$/,
+      message: '密码必须是6-15位的非空字符',
+      trigger: 'blur'
+    }
+  ],
+  repassword: [
+    { required: true, message: '请再次输入密码', trigger: 'blur' },
+    {
+      pattern: /^\S{6,15}$/,
+      message: '密码必须是6-15的非空字符',
+      trigger: 'blur'
+    },
+    {
+      validator: (rule, value, callback) => {
+        if (value !== formModel.value.password) {
+          callback(new Error('两次输入密码不一致!'))
+        } else {
+          callback()
+        }
+      },
+      trigger: 'blur'
+    }
+  ]
+}
+```
+
+4. prop 绑定校验规则
+
+```jsx
+<el-form-item prop="username">
+  <el-input
+    v-model="formModel.username"
+    :prefix-icon="User"
+    placeholder="请输入用户名"
+  ></el-input>
+</el-form-item>
+... 
+(其他两个也要绑定prop)
+```
+
+## 注册前的预校验
+
+在用户点击注册按钮时，我们需要先对用户输入的数据进行预校验，确保数据符合要求后，才能发送注册请求。我们可以通过调用element-plus的`validate`方法来实现预校验。
+
+1. 通过 ref 获取到 表单组件
+
+```jsx
+const form = ref()
+
+<el-form ref="form">
+```
+
+2. 注册之前进行校验
+
+```jsx
+<el-button
+  @click="register"
+  class="button"
+  type="primary"
+  auto-insert-space
+>
+  注册
+</el-button>
+
+const register = async () => {
+  await form.value.validate()
+  console.log('开始注册请求')
+}
+```
+
+注意，之所以要通过`ref`获取到表单组件，是因为`validate`方法在element-plus中是表单组件提供的一个方法，我们需要通过组件实例来调用它，从而获取到我们待会儿需要判断是否输入正确的表单组件。
+
+而在`register`方法中，通过`form.value`是因为之前我们在学`ref`时说过，如果直接用`form`访问那么它是一个对象，只有加上`.value`属性才是我们需要的真实数据。
+
+另外，我们之所以需要加上`await`，是因为`validate`方法element-plus所预定义的是一个异步方法，它会返回一个Promise对象。如果成功，就会执行后面的代码，而如果失败，则会以它独有的提示告诉你，你输入的信息和要求的不匹配，如下所示：
+
+![alt text](image-371.png)
+
+上面的三点都是视频里没有的，在这里写下加深一些印象。
+
+## 封装api实现注册功能
+
+这一步只有一个地方要说，就是怎么去忽略ElMessage的vscode飘红问题（因为我配置的是按需导入的element-plus组件，vscode则会认为我没有导入相应的组件）。旧的文档的项目结构比较老，而我的项目结构比较新，在询问AI之后给出了答复：
+
+把全局变量加入 flat 配置的 languageOptions.globals 即可。修改 `eslint.config.js` 中对应块，示例改动如下：
+
+```javascript
+// ...existing code...
+  {
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ElMessage: 'readonly',
+        ElMessageBox: 'readonly',
+        ElLoading: 'readonly'
+      }
+    }
+  },
+// ...existing code...
+```
