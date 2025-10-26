@@ -1252,3 +1252,17 @@ const register = async () => {
   },
 // ...existing code...
 ```
+
+## 登录访问拦截
+
+在用户访问需要登录才能访问的页面时，我们需要先检查用户是否已经登录。如果没有登录，则重定向到登录页面。这部分的知识点我们参考vue-router导航守卫的知识。
+
+下面的代码我们需要加在`router/index.js`中：
+
+```jsx
+// 登录访问拦截
+router.beforeEach((to) => {
+  const userStore = useUserStore()
+  if (!userStore.token && to.path !== '/login') return '/login'
+})
+```
