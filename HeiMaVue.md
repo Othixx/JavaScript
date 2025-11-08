@@ -1018,6 +1018,8 @@ import prettierPlugin from 'eslint-plugin-prettier'
 
 这一步旨在加入element-plus组件。我们为了节省打包大小，使用按需导入。详细配置方法参看完整笔记。
 
+需要关注的是，一旦引入了`unplugin-vue-components`这个插件，那么`src/components`文件夹下面的组件就不需要再手动引入，会被自动导入，直接在模板中使用即可。
+
 ## Pinia 构建仓库和持久化
 
 用Pinia构建仓库，很简单不用说，但是持久化的话，我们需要再安装一个`pinia-plugin-persistedstate`插件。
@@ -1270,3 +1272,20 @@ router.beforeEach((to) => {
   if (!userStore.token && to.path !== '/login') return '/login'
 })
 ```
+
+## 用户退出
+
+这一部分我们了解了两个element-plus小功能，`el-dropdown`和`ElMessageBox.confirm`。前者用于实现下拉菜单，后者用于实现弹出确认框。详细信息参见官方文档就可以。
+
+## 基本架子 - PageContainer 组件
+
+这部分内容在实际编写的时候要注意两点：
+
+1. `<el-card`组件里面会有`<template #header>`这种用法，这是因为`el-card`组件提供了一个具名插槽`header`，用于自定义卡片的头部内容。通过这种方式，我们可以将自定义的头部内容插入到`el-card`组件的指定位置，从而实现更灵活的布局和样式，同理还有脚部组件`#footer`。**至于具体的实现方式，你是无法在外部看到的，因此一开始的时候我很疑惑为什么可以这么写**。
+
+2. 我们之前在配置element-plus的时候，配置了按需导入，安装了`unplugin-vue-components`这个插件，这个插件会把`src/components`文件夹下面的组件自动导入注册，因此我们在使用`PageContainer`组件时，不需要再手动引入，直接在模板中使用即可。
+
+## 文章分类渲染
+
+这一部分主要学习了element-plus的`el-table`组件的使用方法，以及给某个组件添加一个`v-loading`效果，让它在加载时可以转圈。
+
