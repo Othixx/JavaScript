@@ -930,6 +930,10 @@ Vue3中的生命周期函数相比于Vue2有一丝丝的不同，但是都很有
 
 接口地址 https://fe-bigevent-web.itheima.net/
 
+**重要！在编写本项目前，强烈建议关闭vscode中的自动包导入（auto import）功能，防止造成不必要的麻烦**。
+
+关闭方法：打开vscode设置，搜索`import`，找到`Javascript/Typescript: Auto Import Suggestions`选项，取消勾选即可。
+
 ## pnpm 包管理器
 
 在大事件项目的第一步，我们需要认识一个包管理器pnpm，它是一个快速、节省空间的包管理器，类似于npm和yarn。它通过硬链接和符号链接来共享依赖包，从而节省磁盘空间和提高安装速度。后续我们都使用pnpm来管理。
