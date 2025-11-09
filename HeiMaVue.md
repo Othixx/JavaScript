@@ -1285,7 +1285,7 @@ router.beforeEach((to) => {
 
 这部分内容在实际编写的时候要注意两点：
 
-1. `<el-card`组件里面会有`<template #header>`这种用法，这是因为`el-card`组件提供了一个具名插槽`header`，用于自定义卡片的头部内容。通过这种方式，我们可以将自定义的头部内容插入到`el-card`组件的指定位置，从而实现更灵活的布局和样式，同理还有脚部组件`#footer`。**至于具体的实现方式，你是无法在外部看到的，因此一开始的时候我很疑惑为什么可以这么写**。
+1. `<el-card>`组件里面会有`<template #header>`这种用法，这是因为`el-card`组件提供了一个具名插槽`header`，用于自定义卡片的头部内容。通过这种方式，我们可以将自定义的头部内容插入到`el-card`组件的指定位置，从而实现更灵活的布局和样式，同理还有脚部组件`#footer`。**至于具体的实现方式，你是无法在外部看到的，因此一开始的时候我很疑惑为什么可以这么写**。
 
 2. 我们之前在配置element-plus的时候，配置了按需导入，安装了`unplugin-vue-components`这个插件，这个插件会把`src/components`文件夹下面的组件自动导入注册，因此我们在使用`PageContainer`组件时，不需要再手动引入，直接在模板中使用即可。
 
@@ -1293,3 +1293,13 @@ router.beforeEach((to) => {
 
 这一部分主要学习了element-plus的`el-table`组件的使用方法，以及给某个组件添加一个`v-loading`效果，让它在加载时可以转圈。
 
+## 文章分类添加编辑 [element-plus 弹层]
+
+需要注意一个地方，我们在把`ChannelEdit`组件剥离出去后，由于我们是在子模块下面定义的该组件，而不是在`src/components`下面定义的，因此`unplugin-vue-components`插件是无法自动导入注册该组件的，我们需要手动引入并注册该组件，才能在父组件中使用它。**而对于这种单文件组件的注册方式，我们要写成默认导入，而不能是命名导入**：
+
+```jsx
+import ChannelEdit from './components/ChannelEdit.vue'  // 正确写法，默认导入
+// import { ChannelEdit } from './components/ChannelEdit.vue'  // 错误写法，命名导入
+```
+
+此外，这里的通过ref绑定实际上是模板引用的语法，有些忘记，应该再回顾一下。绑定完成之后，通过`dialog.value`就可以成功取到DOM对象以及其方法。子组件往父组件暴露方法要使用`defineExpose`编译器宏，这个也再回顾一下。
