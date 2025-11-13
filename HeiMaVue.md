@@ -1303,3 +1303,11 @@ import ChannelEdit from './components/ChannelEdit.vue'  // 正确写法，默认
 ```
 
 此外，这里的通过ref绑定实际上是模板引用的语法，有些忘记，应该再回顾一下。绑定完成之后，通过`dialog.value`就可以成功取到DOM对象以及其方法。子组件往父组件暴露方法要使用`defineExpose`编译器宏，这个也再回顾一下。
+
+## 文章分类删除
+
+这里的删除接口，由于后端的参数是Query，而不是Body，因此我们需要通过`params`来传递参数，而不是通过`data`来传递参数。
+
+`request.post(url, data)` 和 `request.put(url, data)` 会把第二个参数作为请求体（body）发送，适用于后端要求从 body 读取的接口（例如新增/编辑）
+
+在删除前可以跳出一个消息提示对话框，这里我们使用了`ElMessageBox.confirm`来实现，具体可以参考官方文档与详细笔记。
