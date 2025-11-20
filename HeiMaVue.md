@@ -280,7 +280,7 @@ export default {
 
 ### 3.1 `v-model`原理
 
-它本质上就是个语法糖。实现了数据的双向绑定，例如应用在输入框上，就是`value`属性和`input`事件的合写。
+它本质上就是个语法糖。实现了数据的双向绑定，例如应用在输入框上，就是`value`属性和`input`事件的合写。（复习：`:`是`v-bind`的缩写，用于实现数据变了，试图跟着变）
 
 ![alt text](image-254.png)
 
@@ -854,6 +854,8 @@ Vue3中的生命周期函数相比于Vue2有一丝丝的不同，但是都很有
 
 `defineOptions`是Vue3.3新引入的一个编译器宏，用于在`<script setup>`语法糖中定义组件的选项（因为在这个语法糖里不能去定义其他平级的东西比如props或者options），比如说组件的名称、继承的属性等。
 
+具体可以参考这篇文章 https://www.cnblogs.com/ganto/articles/17917868.html，它的前面部分讲得比较清楚。
+
 ![alt text](image-349.png)
 
 ### 5.2 defineModel
@@ -1311,3 +1313,21 @@ import ChannelEdit from './components/ChannelEdit.vue'  // 正确写法，默认
 `request.post(url, data)` 和 `request.put(url, data)` 会把第二个参数作为请求体（body）发送，适用于后端要求从 body 读取的接口（例如新增/编辑）
 
 在删除前可以跳出一个消息提示对话框，这里我们使用了`ElMessageBox.confirm`来实现，具体可以参考官方文档与详细笔记。
+
+## 文章管理——静态结构
+
+这里的有一个地方和视频中不一样，`<el-form inline>`在此时的element-plus版本中是不会自动调整宽度了，我们要手动写一个css设置它的宽度：
+
+```jsx
+<style lang="scss" scoped>
+.el-select {
+  width: 240px;
+}
+</style>
+```
+
+![alt text](image-372.png)
+
+上图为官方注解。
+
+另外，因为我们目前没有给`<el-select>`绑定`v-model`，所以它目前没有办法显示我们当前到底选中了哪一个。
