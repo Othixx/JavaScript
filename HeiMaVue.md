@@ -1351,3 +1351,8 @@ import ChannelEdit from './components/ChannelEdit.vue'  // 正确写法，默认
 这一部分我们了解到element-plus的`el-upload`组件，它用于实现文件上传功能。具体的使用方法可以参考官方文档。默认情况下`auto-upload`属性是开启的，如果我们想要手动上传文件，可以将该属性设置为`false`。
 
 此外，我们通过`imgUrl.value = URL.createObjectURL(uploadFile.raw)`来实现文件预览功能。`URL.createObjectURL`方法会创建一个指向上传文件的临时URL（创建一个blob），我们可以将这个URL赋值给`imgUrl`，从而在页面上预览上传的图片。
+
+### 富文本编辑器
+
+这一节我们学习了使用`vue-quill`富文本编辑器。
+
