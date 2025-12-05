@@ -1321,3 +1321,19 @@ function debounce(fn, delay) {
 ![alt text](image-143.png)
 
 有了防抖的基础之后，上面的代码就很好理解了。**需要注意的是，我们清空定时器的时候必须写成`timer = null`的形式而不能是`clearTimeout(timer)`，是因为我们的这句话写在`setTimeout()`的回调函数中，如果直接调用`clearTimeout(timer)`，那么会无法正确清除定时器。**
+
+# Part 4 JS 原理课 - 面试技巧
+
+## Day 1
+
+### 1 确定this的值
+
+一般情况下，谁调用的它，this就指向谁，另外留意一下下面的两个知识点：
+
+![alt text](image-373.png)
+
+上面这种情况中，第一个`this`指向`food`，因为是`food`调用的它，第二个`this`指向`window`，因为实际上，`setTimeout`的完整写法是`window.setTimeout()`，所以是全局调用的它。
+
+![alt text](image-374.png)
+
+而如果在箭头函数里面，`this`指向的是外层作用域的`this`，所以这里的第二个`this`指向`food`，与第一个指向相同。
