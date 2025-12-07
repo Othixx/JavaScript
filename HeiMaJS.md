@@ -1337,3 +1337,46 @@ function debounce(fn, delay) {
 ![alt text](image-374.png)
 
 而如果在箭头函数里面，`this`指向的是外层作用域的`this`，所以这里的第二个`this`指向`food`，与第一个指向相同。
+
+### 2 手写`call`
+
+首先我们要知道，使用`call`可以改变函数的`this`指向，调用方法如下：
+
+```javascript
+fn.call(obj, arg1, arg2, ...);  // this指向obj，后面是参数列表
+```
+
+上述语句调完之后，会自动返回值，而不需要重新执行。那如何手写实现`call`呢？
+
+首先，我们定义`myCall`方法，`call`能够被所有的函数调用，那么我们需要将它添加到`Function.prototype`上（它是`Function`的原型对象）：
+
+```javascript
+Function.prototype.myCall = function (thisArg, ...args) {
+    // 实现代码
+}
+```
+
+接着，我们修改`this`指向传入的`thisArg`，然后执行函数。我们的`myCall`调用形式是，`fn.myCall()`，因此在`myCall`里面，`this`指向的就是原被调用函数，理解好这个才看得懂下面的代码：
+
+```javascript
+Function.prototype.myCall = function (thisArg, ...args) {
+    thisArg.f = this;  // 由于被调用函数中的this需要指向thisArg对象，所以需要将函数作为thisArg的一个方法，注意我们可以在外部直接给对象赋值一个属性
+    thisArg.f(...args);  // 执行函数
+    delete thisArg.f;  // thisArg对象本身并没有f属性，而是我们修改this指向时添加的，所以执行完之后需要删除
+}
+```
+
+最后，我们需要返回函数的结果：
+
+```javascript
+Function.prototype.myCall = function (thisArg, ...args) {
+    thisArg.f = this;  // 由于被调用函数中的this需要指向thisArg对象，所以需要将函数作为thisArg的一个方法，注意我们可以在外部直接给对象赋值一个属性
+    const result = thisArg.f(...args);  // 用一个result去保存结果
+    delete thisArg.f;  // thisArg对象本身并没有f属性，而是我们修改this指向时添加的，所以执行完之后需要删除
+    return result;  // 返回结果
+}
+```
+
+这样完整的`myCall`方法就实现了。
+
+上面中，我们还学习到一点，就是使用`delete`关键字可以删除对象的属性。
