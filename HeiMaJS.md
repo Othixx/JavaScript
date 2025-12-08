@@ -992,7 +992,7 @@ console.log(num.toFixed(4));  // 输出：3.1416
 
 ### 2. 原型
 
-原型是JS中实现继承的核心概念。每个函数都有一个`prototype`属性，指向一个对象，这个对象就是该函数的原型。通过原型，我们可以将方法和属性共享给所有实例。也通过原型，我们可以实现方法的复用，节省内存空间。**固定属性写在构造函数中，固定方法写在原型对象中。**
+原型是JS中实现继承的核心概念。每个函数都有一个`prototype`属性，指向一个对象，我们把这个对象称作**原型对象**。通过原型，我们可以将方法和属性共享给所有实例。也通过原型，我们可以实现方法的复用，节省内存空间。**固定属性写在构造函数中，固定方法写在原型对象中。**
 
 ![alt text](image-120.png)
 
@@ -1346,7 +1346,21 @@ function debounce(fn, delay) {
 fn.call(obj, arg1, arg2, ...);  // this指向obj，后面是参数列表
 ```
 
-上述语句调完之后，会自动返回值，而不需要重新执行。那如何手写实现`call`呢？
+上述语句调完之后，会自动返回值，而不需要重新执行。那如何手写实现`call`呢？我们需要先写出调用`call`的形式，方便我们后续理解：
+
+```javascript
+const person = {
+  name: "itheima",
+};
+function func(numA, numB) {
+  console.log(this);
+  console.log(numA, numB);
+  return numA + numB;
+}
+// 调用并获取返回值
+const res = func.myCall(person, 2, 8);
+console.log("返回值为:", res);
+```
 
 首先，我们定义`myCall`方法，`call`能够被所有的函数调用，那么我们需要将它添加到`Function.prototype`上（它是`Function`的原型对象）：
 
@@ -1380,3 +1394,148 @@ Function.prototype.myCall = function (thisArg, ...args) {
 这样完整的`myCall`方法就实现了。
 
 上面中，我们还学习到一点，就是使用`delete`关键字可以删除对象的属性。
+
+### 3 手写`call` - Symbol调优
+
+上面的`myCall`方法虽然实现了功能，但是有一个问题，就是如果传入的`thisArg`对象本身就有一个`f`属性，那么就会被覆盖掉，导致不可预知的错误。为了解决这个问题，我们可以使用`Symbol`来创建一个唯一的属性名，避免属性名冲突。
+
+关于`Symbol`，我们可以参见MDN：https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol/Symbol 。调用`Symbol()`可以返回一个`Symbol`类型的唯一值（这个类型是ES6新增，可以想成和`BigInt`差不多）。调用时不能加`new`，因为它不是一个构造函数。
+
+那么如何把`Symbol`类型的值用作对象的属性名呢？这里我们又重新回顾一下JS中的属性访问器，https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/Property_accessors 。
+
+![alt text](image-375.png)
+
+可以看到，上面提到了关键一点，如果使用**点表示法**，那么它一定得是一个合法的标识符。那么什么又是标识符呢？
+
+![alt text](image-376.png)
+
+下面举几个具体的例子：
+
+```javascript
+// 有效的标识符（可以用点号访问）
+const obj = {
+  name: 'John',     // ✅ 字母开头
+  _private: 'data', // ✅ 下划线开头
+  $elem: 'div',     // ✅ $开头
+  name123: 'test',  // ✅ 包含数字但不是开头
+  firstName: 'John' // ✅ 驼峰命名
+};
+
+// 无效的标识符（必须用中括号）
+const obj2 = {
+  '123name': 'test',   // ❌ 数字开头
+  'full-name': 'John', // ❌ 包含连字符
+  'first name': 'John' // ❌ 包含空格
+};
+```
+
+综上，我们想要使用`Symbol`类型的值作为对象的属性名，那么只能使用**中括号表示法**，因为`Symbol`类型的值不是一个合法的标识符。那么方括号表示法是怎么样的呢？
+
+![alt text](image-377.png)
+
+上面比较抽象，下面给一个具体例子：
+
+```javascript
+// 情况1：点号语法
+obj.name
+// 引擎：直接查找字符串 "name" 属性
+
+// 情况2：中括号语法
+obj[expression]
+// 引擎：先计算 expression 的值，然后查找对应属性
+
+// 情况3：对象字面量
+const obj = {
+  prop: 'value',     // 引擎：prop 被当作字符串 'prop'
+  [variable]: 'value' // 引擎：先计算 variable 的值
+};
+```
+
+上面的情况2就是我们重点应该掌握的语法。放到手写`call`中，我们可以这样使用`Symbol`：
+
+```javascript
+Function.prototype.myCall = function (thisArg, ...args) {
+    const fnSymbol = Symbol();  // 创建一个唯一的Symbol
+    thisArg[fnSymbol] = this;  // 使用中括号语法，避免属性名冲突
+    const result = thisArg[fnSymbol](...args);  // 执行函数
+    delete thisArg[fnSymbol];  // 删除属性
+    return result;  // 返回结果
+}
+```
+
+这样子，我们就成功避免了属性名冲突的问题，完善了`myCall`方法的实现。
+
+### 4 手写`apply`
+
+`apply`方法和`call`方法类似，区别在于`apply`方法接受**一个数组**作为参数，而`call`方法直接接受多个参数。由于步骤基本和`call`一样，我们直接给出最终代码：
+
+```javascript
+Function.prototype.myApply = function (thisArg, argsArray) {
+    const fnSymbol = Symbol();  // 创建一个唯一的Symbol
+    thisArg[fnSymbol] = this;  // 使用中括号语法，避免属性名冲突
+    const result = thisArg[fnSymbol](...argsArray);  // 执行函数，使用展开运算符
+    delete thisArg[fnSymbol];  // 删除属性
+    return result;  // 返回结果
+}
+```
+
+### 5 手写`bind`
+
+`bind`方法是不会立即执行的。这就意味着，我们手写`bind`方法时，不需要立即调用函数，而是返回一个新的函数。这个新的函数在调用时，`this`指向传入的`thisArg`，并且可以接受参数。
+
+我们先写出需要实现的调用形式：
+
+```javascript
+const person = {
+  name: "itheima",
+};
+function func(numA, numB, numC, numD) {
+  console.log(this);
+  console.log(numA, numB, numC, numD);
+  return numA + numB + numC + numD;
+}
+const bindFunc = func.myBind(person, 1, 2);
+const res = bindFunc(3, 4);
+console.log("返回值:", res);
+```
+
+首先还是搭架子：
+
+```javascript
+Function.prototype.myBind = function (thisArg, ...args) {
+    // 返回一个新的函数
+    return () => {  // 这里我们使用箭头函数，是为了方便后续绑定this
+        // 实现代码
+    }
+}
+```
+
+然后，我们尝试实现返回绑定了`thisArg`的新函数，同时因为`bind`还能绑定新的剩余参数，我们用`reArgs`来表示剩余参数，并作为新函数的传入：
+
+```javascript
+Function.prototype.myBind = function (thisArg, ...args) {
+    return (...reArgs) => {
+        this.call(thisArg, ...args, ...reArgs);     // 注意这里需要直接调用call或者apply方法改变this指向，此外剩余参数要跟在后面，顺序不能反；此外这里的this就是原函数func
+    }
+}
+```
+
+最后，函数还得有返回值，返回的就是`call`方法调用函数的返回值，因此直接返回即可：
+
+```javascript
+Function.prototype.myBind = function (thisArg, ...args) {
+    return (...reArgs) => {
+        return this.call(thisArg, ...args, ...reArgs);     // 注意这里需要直接调用call或者apply方法改变this指向，此外剩余参数要跟在后面，顺序不能反；此外这里的this就是原函数func
+    }
+}
+```
+
+### 6 ES6-class实现继承
+
+![alt text](image-378.png)
+
+我们用`extends`关键字实现继承，用`super`关键字调用父类的构造函数或属性。注意在类中`this`指向的是实例对象。
+
+### 7 class静态属性与私有属性
+
+![alt text](image-379.png)
