@@ -1539,3 +1539,103 @@ Function.prototype.myBind = function (thisArg, ...args) {
 ### 7 class静态属性与私有属性
 
 ![alt text](image-379.png)
+
+### 8 ES5的寄生组合式继承
+
+理解这个是有些难度的，在这里我们需要贴一张之前出现过的图片：
+
+![alt text](image-128.png)
+
+这是原型链三角形，在下面的实现中，我们需要用到原型链三角形的一些关系。
+
+所谓寄生组合式继承，即**通过借用构造函数来继承属性，通过原型链的混成形式来继承方法**。
+
+下面先给出一个例子，父类构造函数以及父类的方法：
+
+```javascript
+// 父类构造函数
+function Person(name) {
+    this.name = name
+}
+// 父类原型
+Person.prototype.sayHi = function () {
+    console.log(`你好，我叫${this.name}`);
+}
+```
+
+现在我们需要继承一个子类，`Student`，应该如何实现呢？首先，我们定义一个子类构造函数，通过它来继承父类的属性：
+
+```javascript
+// 子类
+function Student(name) {
+    Person.call(this, name);  // 借用构造函数继承属性
+}
+```
+
+上面的代码中，`this`指向的是`Student`的实例对象，通过`call`方法调用`Person`构造函数，从而把`Person`构造函数中的`this`指向`Student`实例对象，实现了属性的继承。
+
+接着，我们需要基于父类的原型，使用`Object.create`方法，创建一个新的原型对象，作为子类的原型对象，从而实现方法的继承：
+
+```javascript
+const prototype = Object.create(Person.prototype);  // 创建一个新的原型对象，继承父类原型
+Student.prototype = prototype;  // 设置子类原型对象
+```
+
+这样子，子类的原型对象就指向了一个新的对象，该对象1:1继承了父类的原型对象，从而实现了方法的继承。但是仍旧存在一个问题，我们在上面的图片中可知，**子类原型对象中`constructor`属性指向的构造函数，仍旧指回了父类构造函数`Person`，这就导致了原型链断裂**，我们需要手动将`constructor`属性指回子类构造函数：
+
+```javascript
+Student.prototype.constructor = Student;
+```
+
+这样子才完成了寄生组合式继承，我们来看下完整代码：
+
+```javascript
+// 父类构造函数
+function Person(name) {
+    this.name = name
+}
+// 父类原型
+Person.prototype.sayHi = function () {
+    console.log(`你好，我叫${this.name}`);
+}
+// 子类
+function Student(name) {
+    Person.call(this, name);  // 借用构造函数继承属性
+}
+const prototype = Object.create(Person.prototype);  // 创建一个新的原型对象，继承父类原型
+Student.prototype = prototype;  // 设置子类原型对象
+Student.prototype.constructor = Student;  // 修正constructor指向
+```
+
+最后来解释下为什么叫做“寄生组合式继承”：
+
+- 组合式继承：是因为它结合了借用构造函数和原型链两种继承方式，前者用来继承属性，后者用来继承方法。
+- 寄生式继承：是因为它通过创建一个新的原型对象（寄生对象）来继承父类的原型，从而实现方法的继承。实例内部的原型链是：instance -> Student.prototype -> Person.prototype。
+
+![alt text](image-380.png)
+
+### 9 fetch - 核心语法
+
+`fetch`是一个基于Promise的网络请求API，用来替代传统的`XMLHttpRequest`，它的写法与`axios`类似，不过比较简洁，适合用在只需要发送一两个请求的小项目中。
+
+![alt text](image-381.png)
+
+如上所示，当我们调用最基本的`GET`请求时，`fetch`方法只需要传入一个URL即可。它会返回一个`Promise<Response>`对象，我们可以通过它的`.status`属性获取响应状态码，通过`.json()`方法将响应体解析为JSON格式。请注意，`.json()`方法也是一个异步操作，它会返回一个`Promise`对象，因此我们需要使用`await`关键字等待它的解析结果。
+
+![alt text](image-382.png)
+
+下图所示为`.json()`方法解析前后的结果：
+
+![alt text](image-383.png)
+
+### 10 fetch - 提交formData
+
+![alt text](image-384.png)
+
+注意：提交`formData`时，不需要手动设置`Content-Type`请求头，浏览器会自动帮我们设置。
+
+### 11 fetch - 提交JSON
+
+![alt text](image-385.png)
+
+注意：提交`JSON`时，需要手动设置`Content-Type`请求头为`application/json`，并且需要使用`JSON.stringify()`方法将对象转换为字符串。
