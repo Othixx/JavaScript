@@ -1639,3 +1639,21 @@ Student.prototype.constructor = Student;  // 修正constructor指向
 ![alt text](image-385.png)
 
 注意：提交`JSON`时，需要手动设置`Content-Type`请求头为`application/json`，并且需要使用`JSON.stringify()`方法将对象转换为字符串。
+
+### 12 Generator - 核心语法
+
+![alt text](image-386.png)
+
+我们在需要暂停的语句之前加上`yield`关键字，然后通过调用生成器函数返回的迭代器对象的`.next()`方法来控制函数的执行。每次调用`.next()`方法，函数会执行到下一个`yield`语句处暂停，并返回一个对象，该对象包含两个属性：`value`表示当前`yield`语句的值，`done`表示函数是否执行完毕。
+
+（这个`yield`可以被理解成带有暂停功能的`return`）
+
+看一下`next()`方法的返回值：
+
+![alt text](image-387.png)
+
+注意到，最后一个`yield`执行完之后，函数返回的`done`还是`false`，等到下一次再执行`.next()`方法时，函数才会真正执行完毕，返回`done`为`true`，返回的`value`则为`undefined`。
+
+以及`for...of`循环调用生成器函数：
+
+![alt text](image-388.png)
