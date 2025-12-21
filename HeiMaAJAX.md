@@ -118,7 +118,9 @@ XMLHttpRequest可以通过`send`方法提交数据，通常需要设置请求头
 ## 4 Promise
 
 ### 4.1 Promise介绍
+
 ![alt text](image-159.png)
+
 ![alt text](image-160.png)
 
 ### 4.2 Promise三种状态

@@ -1657,3 +1657,16 @@ Student.prototype.constructor = Student;  // 修正constructor指向
 以及`for...of`循环调用生成器函数：
 
 ![alt text](image-388.png)
+
+### 13 Generator - 管理异步
+
+写起来相较于`async/await`要麻烦一些，所以`async/await`实际上是成为了`Generator`的语法糖。下面是一个使用`Generator`管理异步的例子：
+
+![alt text](image-389.png)
+
+第一个里面`return`出去一个Promise对象，给第二个使用。
+
+## Day 2 - 手写Promise
+
+下面部分的所有内容都在实现手写Promise。
+
