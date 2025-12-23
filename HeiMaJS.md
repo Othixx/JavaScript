@@ -1670,3 +1670,34 @@ Student.prototype.constructor = Student;  // 修正constructor指向
 
 下面部分的所有内容都在实现手写Promise。
 
+### 1 实现构造函数
+
+我们定义一个类的名称叫`HMPromise`，这是我们未来手写实现的Promise类，依据真实的Promise对象，我们先写出未来要测试的代码：
+
+```javascript
+const p = new Promise((resolve, reject) => {
+    resolve('success')
+    // reject('error')
+})
+```
+
+我们之前学过，Promise在实例化的过程中，就会执行完所有的同步操作，此时的状态变成pending等待状态，等异步操作执行完毕之后，状态才会变成fulfilled或rejected。因此，我们需要在构造函数中立即执行传入的函数`func`，并且传入两个函数参数`resolve`和`reject`，这两个函数用来改变Promise的状态。
+
+```javascript
+class HMPromise {
+    constructor (func) {
+        const resolve = (result) => {}  // 这两个函数也需要有一个传入参数
+        const reject = (result) => {}
+
+        func(resolve, reject);  // 立即执行传入的函数
+    }
+}
+
+// 测试代码
+const p = new Promise((resolve, reject) => {
+    resolve('success')
+    // reject('error')
+})
+```
+
+我们来模拟一下上述函数的过程，这个很重要，只有理解了过程才能明白这中间参数传来传去到底在干什么。首先定义一个`HMPromise`类，然后实例化它，传入一个函数`func`，这一整个函数被扔进了构造函数中，然后立即执行。这个函数传入的两个函数参数`resolve`和`reject`，实际上是构造函数中定义的两个函数。接着，在传入的函数中，我们调用了`resolve('success')`，这就相当于调用了构造函数中的`resolve`函数，并传入了参数`'success'`。
