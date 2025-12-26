@@ -1701,3 +1701,22 @@ const p = new Promise((resolve, reject) => {
 ```
 
 我们来模拟一下上述函数的过程，这个很重要，只有理解了过程才能明白这中间参数传来传去到底在干什么。首先定义一个`HMPromise`类，然后实例化它，传入一个函数`func`，这一整个函数被扔进了构造函数中，然后立即执行。这个函数传入的两个函数参数`resolve`和`reject`，实际上是构造函数中定义的两个函数。接着，在传入的函数中，我们调用了`resolve('success')`，这就相当于调用了构造函数中的`resolve`函数，并传入了参数`'success'`。
+
+接下来，为了让`resolve`和`reject`变得更明显，我们稍微修改一下构造函数：
+
+```javascript
+// ...
+construct (func) {
+    const resolve = (result) => {
+        console.log('调用了resolve函数，参数为：', result);
+    }
+    const reject = (result) => {
+        console.log('调用了reject函数，参数为：', result);
+    }
+
+    func(resolve, reject);  // 立即执行传入的函数
+}
+// ...
+```
+
+这样子，我们就可以清楚地看到，当我们调用`resolve('success')`时，实际上是调用了构造函数中的`resolve`函数，并传入了参数`'success'`，从而打印出相应的日志。
