@@ -1720,3 +1720,52 @@ construct (func) {
 ```
 
 这样子，我们就可以清楚地看到，当我们调用`resolve('success')`时，实际上是调用了构造函数中的`resolve`函数，并传入了参数`'success'`，从而打印出相应的日志。
+
+### 2 状态及原因
+
+这里我们继续完善上面定义的类。我们先定义三个常量，分别表示Promise的三种状态：
+
+```javascript
+const PENDING = 'pending'
+const FULFILLED = 'fulfilled'
+const REJECTED = 'rejected'
+```
+
+接着在类里面，我们定义两个属性，`state`表示当前Promise的状态，初始值为`PENDING`；`result`表示Promise的原因，初始值为`undefined`。
+
+```javascript
+class HMPromise {
+    state = PENDING
+    result = undefined
+
+    constructor (func) {
+        // ...
+    }
+}
+```
+
+然后我们要修改刚才的`resolve`和`reject`函数，让它们能够改变Promise的状态和原因，同时还有一点很重要，只有在`pending`状态下才能改变状态：
+
+```javascript
+class HMPromise {
+    state = PENDING
+    result = undefined
+
+    constructor (func) {
+        const resolve = (result) => {
+            if (this.state === PENDING) {  // 只有在pending状态下才能改变状态，并且由于是箭头函数，这里的this恰好同上级构造函数的作用域一致，指向当前实例对象
+                this.state = FULFILLED;    // 改变状态为fulfilled
+                this.result = result;       // 设置原因
+            }
+        }
+        const reject = (result) => {
+            if (this.state === PENDING) {  // 只有在pending状态下才能改变状态
+                this.state = REJECTED;     // 改变状态为rejected
+                this.result = result;       // 设置原因
+            }
+        }
+
+        func(resolve, reject);  // 立即执行传入的函数
+    }
+}
+```
