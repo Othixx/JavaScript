@@ -1744,7 +1744,7 @@ class HMPromise {
 }
 ```
 
-然后我们要修改刚才的`resolve`和`reject`函数，让它们能够改变Promise的状态和原因，同时还有一点很重要，只有在`pending`状态下才能改变状态：
+然后我们要修改刚才的`resolve`和`reject`函数，让它们能够改变Promise的状态和原因，同时还有一点很重要，只有在`pending`状态下才能改变状态，这样就保证了状态的不可逆性：
 
 ```javascript
 class HMPromise {
@@ -1768,4 +1768,68 @@ class HMPromise {
         func(resolve, reject);  // 立即执行传入的函数
     }
 }
+```
+
+### 3 then方法
+
+在`then`方法中，我们要先来实现成功和失败的回调函数怎么写，然后我们再来处理异步和多次调用。
+
+#### 3.1 成功和失败回调
+
+首先我们考虑测试代码，因为只有实现了测试代码，我们才好去想我们究竟要添加一个什么功能到原来的类里面。
+
+```javascript
+// 测试代码
+const p = new HMPromise((resolve, reject) => {
+    resolve('success')
+    // reject('error')
+})
+p.then(res => {
+    console.log('成功回调：', res)
+}, err => {
+    console.log('失败回调：', err)
+})
+```
+
+很显然，我们需要在`HMPromise`类中添加一个`then`方法，这个方法接受两个参数，分别是成功回调函数和失败回调函数：
+
+```javascript
+class HMPromise {
+    // ...
+    then (onFulfilled, onRejected) {
+        // 实现代码
+    }
+}
+```
+
+然后根据状态，我们来执行对应的回调函数：
+
+```javascript
+// ...
+then (onFulfilled, onRejected) {
+    if (this.state === FULFILLED) {
+        onFulfilled(this.result)    // 成功回调，这个回调函数可以接收结果
+    }
+    else if (this.state === REJECTED) {
+        onRejected(this.result)     // 失败回调
+    }
+}
+// ...
+```
+
+但是我们还要考虑一个细节，就是，如果用户没有传入成功或失败回调函数怎么办？按照官方的文档，我们需要给它们设置默认值：
+
+```javascript
+// ...
+then (onFulfilled, onRejected) {
+    onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : x => x;  // 如果没有传入成功回调，设置默认值为一个返回参数本身的函数
+    onRejected = typeof onRejected === 'function' ? onRejected : x => { throw x };  // 如果没有传入失败回调，设置默认值为一个抛出错误的函数，注意这个大括号一定要加
+    if (this.state === FULFILLED) {
+        onFulfilled(this.result)    // 成功回调，这个回调函数可以接收结果
+    }
+    else if (this.state === REJECTED) {
+        onRejected(this.result)     // 失败回调
+    }
+}
+// ...
 ```
