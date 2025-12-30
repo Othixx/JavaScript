@@ -1833,3 +1833,142 @@ then (onFulfilled, onRejected) {
 }
 // ...
 ```
+
+#### 3.2 异步和多次调用
+
+在介绍本节之前，先补充一个知识点，就是我们标准的Promise对象是可以被多次调用的（注意多次调用不是链式调用，二者是两个概念）：
+
+```javascript
+const p = new Promise((resolve, reject) => {
+    resolve('success')
+    // reject('error')
+})
+p.then(res => {
+    console.log('第一次调用成功回调：', res)
+})
+p.then(res => {
+    console.log('第二次调用成功回调：', res)
+})
+// 输出：
+// 第一次调用成功回调： success
+// 第二次调用成功回调： success
+```
+
+多次 then 会把回调依次加入微任务队列，Promise 一旦 settled（fulfilled/rejected），所有已注册的回调都会按注册顺序被异步（microtask）执行。
+
+而有的时候，`resolve`或`reject`函数是在异步操作中被调用的：
+
+```javascript
+const p = new Promise((resolve, reject) => {
+    setTimeout(() => {
+        resolve('success')
+        // reject('error')
+    }, 1000)
+})
+p.then(res => {
+    console.log('成功回调：', res)
+}, err => {
+    console.log('失败回调：', err)
+})
+// 输出（1秒后）：
+// 成功回调： success
+```
+
+但是我们如果马上执行完了`then`方法，此时Promise的状态仍旧是`pending`，那么上面的代码就无法正常工作了，因此我们希望有一个东西，能够把所有的回调函数都保存起来，等到状态变成`fulfilled`或`rejected`时，再依次调用这些回调函数。（而之所以把异步调用和多次调用放在一起来讲，是因为它们都可以通过保存回调函数来解决，如果多次调用了不同的回调函数，那么我们遇到几个就存几个，然后依次调用就行）
+
+和之前一样，我们还是先给出测试代码，包括多次调用和异步调用：
+
+```javascript
+// 测试代码
+const p = new HMPromise((resolve, reject) => {
+    setTimeout(() => {
+        resolve('success')
+        // reject('error')
+    }, 1000)
+})
+p.then(res => {
+    console.log('第一次调用成功回调：', res)
+})
+p.then(res => {
+    console.log('第二次调用成功回调：', res)
+})
+```
+
+为了保存回调函数，我们在类的内部定义一个私有实例属性`#handlers`，它是一个数组，因为一次调用，最多传入一个成功回调和一个失败回调，我们把它们放在一个对象里，然后把这个对象存入到`#handlers`数组中：
+
+```javascript
+class HMPromise {
+    // ...
+    #handlers = []  // [{onFulfilled, onRejected}, ...]
+    // ...
+}
+```
+
+那么在什么时候添加回调函数呢，很显然，是在`then`方法中，因此我们修改`then`方法：
+
+```javascript
+then (onFulfilled, onRejected) {
+    onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : x => x;  // 如果没有传入成功回调，设置默认值为一个返回参数本身的函数
+    onRejected = typeof onRejected === 'function' ? onRejected : x => { throw x };  // 如果没有传入失败回调，设置默认值为一个抛出错误的函数，注意这个大括号一定要加
+    if (this.state === FULFILLED) {
+        onFulfilled(this.result)    // 成功回调，这个回调函数可以接收结果
+    }
+    else if (this.state === REJECTED) {
+        onRejected(this.result)     // 失败回调
+    }
+    else if (this.state === PENDING) {
+        this.#handlers.push({ onFulfilled, onRejected })  // 把回调函数存入handlers数组
+    }
+}
+```
+
+最后，我们需要在`resolve`和`reject`函数中，状态改变之后，依次调用这些回调函数。我们在这里给出到目前为止实现的Promise完整代码：
+
+```javascript
+const PENDING = 'pending'
+const FULFILLED = 'fulfilled'
+const REJECTED = 'rejected'
+
+class HMPromise {
+    state = PENDING
+    result = undefined
+    #handlers = []  // [{onFulfilled, onRejected}, ...]
+
+    constructor (func) {
+        const resolve = (result) => {
+            if (this.state === PENDING) {  // 只有在pending状态下才能改变状态，并且由于是箭头函数，这里的this恰好同上级构造函数的作用域一致，指向当前实例对象
+                this.state = FULFILLED;    // 改变状态为fulfilled
+                this.result = result;       // 设置原因
+                this.#handlers.forEach(({ onFulfilled }) => {
+                    onFulfilled(result);    // 依次调用成功回调，对象结构如果搞不清楚，往回看文档
+                });
+            }
+        }
+        const reject = (result) => {
+            if (this.state === PENDING) {  // 只有在pending状态下才能改变状态
+                this.state = REJECTED;     // 改变状态为rejected
+                this.result = result;       // 设置原因
+                this.#handlers.forEach(({ onRejected }) => {
+                    onRejected(result);     // 依次调用失败回调
+                });
+            }
+        }
+
+        func(resolve, reject);  // 立即执行传入的函数
+    }
+
+    then (onFulfilled, onRejected) {
+        onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : x => x;  // 如果没有传入成功回调，设置默认值为一个返回参数本身的函数
+        onRejected = typeof onRejected === 'function' ? onRejected : x => { throw x };  // 如果没有传入失败回调，设置默认值为一个抛出错误的函数，注意这个大括号一定要加
+        if (this.state === FULFILLED) {
+            onFulfilled(this.result)    // 成功回调，这个回调函数可以接收结果
+        }
+        else if (this.state === REJECTED) {
+            onRejected(this.result)     // 失败回调
+        }
+        else if (this.state === PENDING) {
+            this.#handlers.push({ onFulfilled, onRejected })  // 把回调函数存入handlers数组
+        }
+    }
+}
+```
