@@ -1972,3 +1972,86 @@ class HMPromise {
     }
 }
 ```
+
+### 4 异步任务
+
+到目前为止，我们已经实现了一个基本的Promise类，支持状态管理、同步和异步调用、多次调用等功能。但是我们还没有处理一个重要的问题，那就是回调函数的执行时机。
+
+我们来分析这样一段测试代码：
+
+```javascript
+const p = new HMPromise((resolve, reject) => {
+    setTimeout(() => {
+        resolve('success')
+        // reject('error')
+    }, 1000);
+})
+console.log('top')
+const p = new HMPromise((resolve, reject) => {
+    resolve('success')
+})
+p.then(res => {
+    console.log(res)
+})
+console.log('bottom')
+```
+
+如果对于原生的Promise，输出的结果应该是top bottom success，因为then方法中的回调函数会被放入微任务队列中等待执行。但是我们并没有实现这一点，而如果我们想要动手实现它，那么就应该把回调函数放到一个异步任务队列中去执行，那么有什么办法呢？在这里我们采用`queueMicrotask` `MutationObserver` `setTimeout`这三个API去实现。
+
+![alt text](image-390.png)
+
+上面为两个示例，其中`queueMicrotask`传入一个回调函数即可，这个回调函数会被放入微任务队列中等待执行。`MutationObserver`是一个监听DOM变化的API，我们可以通过它监听一个虚拟的DOM节点的变化，从而触发回调函数的执行。`setTimeout`比较熟悉，此处不介绍。
+
+借助于上面的几个API，我们先来定义一个函数，`runAsynctask`，它接受一个回调函数作为参数，然后使用上面的三种方式去实现异步执行，这个函数在未来会给我们的Promise用，从而实现异步：
+
+```javascript
+// 下面的三个API，由于不同的浏览器兼容性不同，我们需要依次判断它们是否存在，存在哪个就用哪个，优先级依次是：queueMicrotask > MutationObserver > setTimeout
+function runAsynctask(callback) {
+    if (typeof queueMicrotask === 'function') {
+        queueMicrotask(callback)
+    }
+    else if (typeof MutationObserver === 'function') {
+        const divNode = document.createElement('div')  // 创建一个虚拟的DOM节点
+        const obs = new MutationObserver(callback)  // 创建一个监听器
+        obs.observe(divNode, { childList: true })  // 监听子节点变化
+        divNode.innerText = '1'  // 触发子节点变化
+    }
+    else {
+        setTimeout(callback, 0)
+    }
+}
+```
+
+手写完了执行异步任务的函数之后，我们需要在Promise类的`resolve`和`reject`函数中，使用这个函数去执行回调函数，而不是直接调用它们。**但是我们建议在`then`方法中，将使用`runAsynctask`包裹好的回调函数存入handlers数组中，来实现**。
+
+```javascript
+// ...
+then (onFulfilled, onRejected) {
+    onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : x => x;  // 如果没有传入成功回调，设置默认值为一个返回参数本身的函数
+    onRejected = typeof onRejected === 'function' ? onRejected : x => { throw x };  // 如果没有传入失败回调，设置默认值为一个抛出错误的函数，注意这个大括号一定要加
+    if (this.state === FULFILLED) {
+        runAsynctask(() => {
+            onFulfilled(this.result)    // 成功回调，这个回调函数可以接收结果
+        })
+    }
+    else if (this.state === REJECTED) {
+        runAsynctask(() => {
+            onRejected(this.result)     // 失败回调
+        })
+    }
+    else if (this.state === PENDING) {
+        this.#handlers.push({
+            onFulfilled: () => {
+                runAsynctask(() => {
+                    onFulfilled(this.result)
+                })
+            },
+            onRejected: () => {
+                runAsynctask(() => {
+                    onRejected(this.result)
+                })
+            }
+        })  // 把回调函数存入handlers数组，这个地方改发和上面两个略有些不一样，需要写完整整个回调函数，而不是简单地传入
+    }
+}
+```
