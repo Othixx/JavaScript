@@ -2055,3 +2055,216 @@ then (onFulfilled, onRejected) {
     }
 }
 ```
+
+### 5 链式编程
+
+到目前为止，我们已经实现了一个基本的Promise类，支持状态管理、同步和异步调用、多次调用等功能，并且保证了回调函数的异步执行。但是我们还没有处理一个重要的问题，那就是链式编程。
+
+![alt text](image-391.png)
+
+实现链式编程比较麻烦，我们看上面这张图，我们在调用`p.then`方法时，有的时候是传入了`resolve`回调，有的时候传入了`reject`回调，还有的时候两个都传入了。无论是哪一种情况，我们都希望`then`方法返回一个新的Promise对象，这样子我们就可以继续调用`then`方法，从而实现链式编程。为此呢，在我们之前写的`then`方法中，针对这么些情况，换言之也就是三个不同的状态，我们都需要稍作修改。我们下面先来看`fulfilled`状态。
+
+#### 5.1 fulfilled状态
+
+在`fulfilled`状态下，我们调用了`onFulfilled`回调函数，并传入了结果。现在我们需要修改这个回调函数，让它返回一个新的Promise对象。然后呢，为了后面能够被链式调用，我们肯定要获取到之前Promise.then中的返回值。我们从上帝视角来看（就是假如说我已经把Promise自己写了一遍，知道怎么去手写它，也知道里面的各个细节），我们获取到的这个返回值，可能是个普通值，可能是个抛出的异常，也可能还是个Promise对象。我们先来看前两种情况，也就是如图所示中的，返回一个普通值或者返回异常。
+
+##### 5.1.1 处理返回普通值、处理异常的情况
+
+还是一样，首先我要给出测试代码，其实在上图中也有，但我这里还要写一遍，让自己心里有个底，知道我们现在到底要实现哪一部分功能。
+
+```javascript
+const p = new HMPromise((resolve, reject) => {
+    resolve(1)
+})
+p.then(res => {
+    console.log(res)
+    // throw 'throw-error'  // 测试返回异常
+    return 2
+}).then(res => {
+    console.log(res)
+}, err => {
+    console.log(err)
+})
+```
+
+既然我们希望能够被链式调用，显然`then`方法就应该返回一个Promise对象，我们来修改代码：
+
+```javascript
+then (onFulfilled, onRejected) {
+    onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : x => x;  // 如果没有传入成功回调，设置默认值为一个返回参数本身的函数
+    onRejected = typeof onRejected === 'function' ? onRejected : x => { throw x };  // 如果没有传入失败回调，设置默认值为一个抛出错误的函数，注意这个大括号一定要加
+
+    const p2 = new HMPromise(resolve, reject) => {
+        // 创建一个新的Promise对象
+    })
+
+    if (this.state === FULFILLED) {
+        runAsynctask(() => {
+            onFulfilled(this.result)    // 成功回调，这个回调函数可以接收结果
+        })
+    }
+    else if (this.state === REJECTED) {
+        runAsynctask(() => {
+            onRejected(this.result)     // 失败回调
+        })
+    }
+    else if (this.state === PENDING) {
+        this.#handlers.push({
+            onFulfilled: () => {
+                runAsynctask(() => {
+                    onFulfilled(this.result)
+                })
+            },
+            onRejected: () => {
+                runAsynctask(() => {
+                    onRejected(this.result)
+                })
+            }
+        })  // 把回调函数存入handlers数组，这个地方改发和上面两个略有些不一样，需要写完整整个回调函数，而不是简单地传入
+    }
+
+    return p2  // 返回新的Promise对象
+}
+```
+
+按照上面的思路，我们必定能返回一个Promise对象。但是问题是，我们如何把`onFulfilled`回调函数的返回值，传递给新的Promise对象呢？给出一个没见过写法就想不到的办法，就是我们在创建的这个Promise对象里面去做那三种状态的判断与处理：
+
+```javascript
+then (onFulfilled, onRejected) {
+    onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : x => x;  // 如果没有传入成功回调，设置默认值为一个返回参数本身的函数
+    onRejected = typeof onRejected === 'function' ? onRejected : x => { throw x };  // 如果没有传入失败回调，设置默认值为一个抛出错误的函数，注意这个大括号一定要加
+
+    const p2 = new HMPromise((resolve, reject) => {  // 创建一个新的Promise对象
+        if (this.state === FULFILLED) {
+            runAsynctask(() => {
+                onFulfilled(this.result)  // 成功回调，这个回调函数可以接收结果
+            })
+        }
+        else if (this.state === REJECTED) {
+            // ...
+        }
+        else if (this.state === PENDING) {
+            // ...
+        }
+    })
+
+    return p2  // 返回新的Promise对象
+}
+```
+
+显然上面这么写不会有问题，因为创建Promise对象里面的代码是同步执行的，这么写和先前写法等价，但这么写的好处就是，我可以很方便的取到之前的返回值了，看下面：
+
+```javascript
+then (onFulfilled, onRejected) {
+    // ...
+    if (this.state === FULFILLED) {
+        runAsynctask(() => {
+            const x = onFulfilled(this.result)  // 获取返回值
+            resolve(x)  // 将返回值传递给新的Promise对象
+        })
+    }
+    // ...
+}
+```
+
+改写成了上面这个样子之后，我们再回去看测试代码，不难发现，当时的`return 2`已经能够被正确的传递到了下一个`then`方法中了。然后我们需要看的是，如果测试代码中被注释掉的那句话，`throw 'throw-error'`被执行了，那么这个异常又该如何传递给下一个`then`方法呢？我们只需要在上面的代码中，使用`try...catch`语句捕获异常，然后调用`reject`函数传递异常即可：
+
+```javascript
+then (onFulfilled, onRejected) {
+    // ...
+    if (this.state === FULFILLED) {
+        runAsynctask(() => {
+            try {
+                const x = onFulfilled(this.result)  // 获取返回值
+                resolve(x)  // 将返回值传递给新的Promise对象
+            }
+            catch (error) {
+                reject(error)  // 将异常传递给新的Promise对象
+            }
+        })
+    }
+    // ...
+}
+```
+
+现在这样，第二个then的后面一个回调函数就能够接收到异常了。
+
+上面部分视频讲解：https://www.bilibili.com/video/BV1mH4y1Q7Z7?spm_id_from=333.788.videopod.episodes&vd_source=3f8c5c4e56e5c611151b798b557016c9&p=23
+
+##### 5.1.2 处理返回Promise对象的情况
+
+我们再来考虑一个比较常见的情况，就是，`onFulfilled`回调函数返回的不是一个普通值，而是一个Promise对象，这其实在我们的AJAX学习中，有遇到过：
+
+![alt text](image-163.png)
+
+上面的代码结合具体业务来看，逻辑能够清楚一些。那如果按照我们定义的`HMPromise`来讲，不难理解，传递给下一个Promise的应该是一整个HMPromise对象，而打印的也是一整个对象，我们来看测试代码：
+
+```javascript
+const p = new HMPromise((resolve, reject) => {
+    resolve(1)
+})
+p.then(res => {
+    console.log(res)
+    return new HMPromise((resolve, reject) => {  // 返回一个Promise对象
+        resolve(2)
+        // reject('error')
+    })
+}).then(res => {
+    console.log(res)
+}, err => {
+    console.log(err)
+})
+```
+
+上面这段代码放到我们目前手写的`HMPromise`中去执行，显然会得到下面的结果：
+
+![alt text](image-392.png)
+
+这是因为我们并没有处理返回Promise对象的情况。那么我们该如何处理呢？我们还是回到上面的代码中去看，我们在`then`方法中创建了一个新的Promise对象`p2`，然后在`fulfilled`状态下，我们调用了`onFulfilled`回调函数，并获取了它的返回值`x`，接着我们调用了`resolve(x)`将这个返回值传递给了新的Promise对象。那么现在我们需要做的，就是判断这个返回值`x`是否是一个Promise对象，如果是的话，我们就需要等待这个Promise对象的状态变成`fulfilled`或`rejected`，然后再调用新的Promise对象的`resolve`或`reject`函数。代码如下：
+
+```javascript
+then (onFulfilled, onRejected) {
+    // ...
+    const p2 = new HMPromise((resolve, reject) => {  // 创建一个新的Promise对象
+        if (this.state === FULFILLED) {
+            runAsynctask(() => {
+                try {
+                    const x = onFulfilled(this.result)  // 获取返回值
+                    if (x instanceof HMPromise) {  // 判断x是否是一个Promise对象
+                        x.then(res => resolve(res), err => reject(err))  // 等待x的状态变成fulfilled或rejected，然后调用新的Promise对象的resolve或reject函数
+                    }
+                    else {
+                        resolve(x)  // 将返回值传递给新的Promise对象
+                    }
+                }
+                catch (error) {
+                    reject(error)  // 将异常传递给新的Promise对象
+                }
+            })
+        }
+        else if (this.state === REJECTED) 
+        // ...
+    }
+    // ...
+    )
+}
+```
+
+最近的几步过程有点绕，但其实想一想，只是Promise的设计者当初考虑到了这种特殊情况，让它留了一手罢了。
+
+##### 5.1.3 处理返回自己（重复引用）的情况
+
+最后我们还要看一种特殊情况：
+
+```javascript
+const p = new HMPromise((resolve, reject) => {
+    resolve(1)
+})
+const p2 = p.then(res => {
+    return p2  // 返回自己，形成循环引用
+})
+
+p2.then(res => { }, err => {
+    console.log('err:', err)
+})
+```
