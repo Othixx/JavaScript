@@ -2268,3 +2268,74 @@ p2.then(res => { }, err => {
     console.log('err:', err)
 })
 ```
+
+就是说，我们不能返回自己，否则会造成重复引用。这种情况很简单，只需要在上面加一个判断即可：
+
+```javascript
+then (onFulfilled, onRejected) {
+    // ...
+    const p2 = new HMPromise((resolve, reject) => {  // 创建一个新的Promise对象
+        if (this.state === FULFILLED) {
+            runAsynctask(() => {
+                try {
+                    const x = onFulfilled(this.result)  // 获取返回值
+                    if (x === p2) {  // 处理返回自己（重复引用）的情况，添加的部分！！！
+                        throw new TypeError('Chaining cycle detected for promise #<HMPromise>')
+                    }
+                    // ...
+                }
+                // ...
+            })
+        }
+        else if (this.state === REJECTED) 
+        // ...
+    }
+    // ...
+    )
+}
+```
+
+#### 5.2 rejected状态
+
+有了前面的fulfilled状态做铺垫，实现rejected状态就变得比较简单。我们这么写来实现：
+
+```javascript
+// ...
+else if (this.state === REJECTED) {
+    runAsynctask(() => {
+        // try...catch处理异常
+        try {
+            const x = onRejected(this.result)
+            resolvePromise(x, p2, resolve, reject)
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+// ...
+function resolvePromise(x, p2, resolve, reject) {
+    // 1. 处理重复引用
+    if (x === p2) {
+        // console.log('返回了p2')
+        // 2. 抛出错误 Chaining cycle detected for promise #<Promise>
+        throw new TypeError('Chaining cycle detected for promise #<Promise>')
+    }
+    // 2. 处理返回Promise对象的情况
+    if (x instanceof HMPromise) {
+        x.then(res => resolve(res), err => reject(err))
+    } else {
+        resolve(x)
+    }
+}
+// ...
+```
+
+在上面我们直接把处理返回值的逻辑抽离成了一个函数`resolvePromise`，这样子就避免了代码重复。此外实现完这一步之后，之前的fulfilled状态部分也应该改用这个函数进行替代。
+
+另外还需要注意一点，在外部我们定义`resolvePromise`函数时，，如果我们把它定义在HMPromise类的后面，那么会使用**函数提升**，请注意，不能给`resolvePromise`函数使用`const`或`let`或`var`去定义，否则函数提升会失效，会导致`then`方法中调用这个函数时报错。或者呢，你可以把这个函数定义在类的前面。
+
+#### 5.4 pending状态
+
+我们还需要按照之前的逻辑，把处理异步的部分也做修改，修改的逻辑类似，因此直接贴图：
+
+![alt text](image-393.png)
