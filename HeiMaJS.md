@@ -2339,3 +2339,55 @@ function resolvePromise(x, p2, resolve, reject) {
 我们还需要按照之前的逻辑，把处理异步的部分也做修改，修改的逻辑类似，因此直接贴图：
 
 ![alt text](image-393.png)
+
+### 6 catch方法
+
+`catch`方法是`then`方法的语法糖，用来处理Promise的失败情况。它接受一个失败回调函数作为参数，等同于调用`then`方法时只传入失败回调函数。上面这句话我们是需要查阅MDN文档知道的，作为我们编写`catch`方法的前置知识。
+
+我们给出测试代码：
+
+```javascript
+const p = new HMPromise((resolve, reject) => {
+    reject('reject-error')
+    // throw 'throw-error'
+})
+p.then(res => {
+    console.log('res:', res)
+}).catch(err => {
+    console.log('err:', err)
+})
+```
+
+我们的实现步骤很简单，就是在`HMPromise`类中添加一个`catch`方法，然后在这个方法中调用`then`方法，并传入`undefined`作为成功回调函数，传入失败回调函数作为参数。代码如下：
+
+```javascript
+class HMPromise {
+    // ...
+    catch (onRejected) {
+        return this.then(undefined, onRejected)
+    }
+}
+```
+
+但是上面这么写还不够，还会引出一个问题。问题就是看我们测试代码注释掉的那个地方，如果我们在Promise的执行函数中抛出了异常，那么这个异常应该被`catch`方法捕获到，但是上面这么写是无法实现的。为了解决这个问题，我们需要在构造函数中，使用`try...catch`语句捕获异常，然后调用`reject`函数传递异常。代码如下：
+
+```javascript
+class HMPromise {
+    // ...
+    constructor (func) {
+        const resolve = (result) => {
+            // ...
+        }
+        const reject = (result) => {
+            // ...
+        }
+
+        try {
+            func(resolve, reject);  // 立即执行传入的函数
+        } catch (error) {
+            reject(error);  // 捕获异常并传递给reject函数
+        }
+    }
+    // ...
+}
+```
