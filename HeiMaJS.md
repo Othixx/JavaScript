@@ -2420,3 +2420,41 @@ class HMPromise {
   // ...
 }
 ```
+
+### 7 finally方法
+
+`finally`方法用于在Promise对象的状态变为`fulfilled`或`rejected`时，执行一个回调函数。无论Promise的状态如何变化，`finally`方法中的回调函数都会被执行。如同`catch`方法，我们也需要查阅MDN文档，了解`finally`方法的具体行为。我们可以看到，MDN文档中有如下的说法：
+
+![alt text](image-394.png)
+
+（具体的几个不同之处过于复杂，也不会影响我们编写，故在此省略不做赘述）
+
+我们给出测试代码：
+
+```javascript
+const p = new HMPromise((resolve, reject) => {
+  // resolve('resolve-res')
+  // reject('reject-error')
+  // throw 'throw-error'
+})
+p.then((res) => {
+  console.log("res:", res)
+})
+  .catch((err) => {
+    console.log("err:", err)
+  })
+  .finally(() => {
+    console.log("finally")
+  })
+```
+
+我们的实现步骤也很简单，就是在`HMPromise`类中添加一个`finally`方法，然后在这个方法中调用`then`方法，并传入一个新的成功回调函数和一个新的失败回调函数，这两个回调函数都会执行`finally`传入的回调函数，然后再返回原来的结果或异常。代码如下：
+
+```javascript
+class HMPromise {
+  // ...
+  finally(onFinally) {
+    return this.then(onFinally, onFinally)
+  }
+}
+```
