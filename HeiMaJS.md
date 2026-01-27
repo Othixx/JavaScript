@@ -2369,7 +2369,7 @@ function resolvePromise(x, p2, resolve, reject) {
 
 至此，我们手写Promise的核心功能已经全部完成，但实际上仍旧存在一个问题，这个问题在下面的第6节中会讲到。
 
-### 6 catch方法
+### 6 catch实例方法
 
 `catch`方法是`then`方法的语法糖，用来处理Promise的失败情况。它接受一个失败回调函数作为参数，等同于调用`then`方法时只传入失败回调函数。上面这句话我们是需要查阅MDN文档知道的，作为我们编写`catch`方法的前置知识。
 
@@ -2421,7 +2421,7 @@ class HMPromise {
 }
 ```
 
-### 7 finally方法
+### 7 finally实例方法
 
 `finally`方法用于在Promise对象的状态变为`fulfilled`或`rejected`时，执行一个回调函数。无论Promise的状态如何变化，`finally`方法中的回调函数都会被执行。如同`catch`方法，我们也需要查阅MDN文档，了解`finally`方法的具体行为。我们可以看到，MDN文档中有如下的说法：
 
@@ -2458,3 +2458,46 @@ class HMPromise {
   }
 }
 ```
+
+### 8 resolve静态方法
+
+`resolve`方法用于将一个值转换为一个已解决的Promise对象。如果传入的值本身就是一个Promise对象，那么直接返回该对象；否则，返回一个新的已解决的Promise对象，且其值为传入的值。上面的这些东西都是通过查阅MDN文档之后知道的。我们给出测试代码：
+
+```javascript
+HMPromise.resolve(
+  new HMPromise((resolve, reject) => {
+    // resolve('resolve')
+    // reject('reject')
+    // throw 'error'
+  }),
+).then(
+  (res) => {
+    console.log("res:", res)
+  },
+  (err) => {
+    console.log("err:", err)
+  },
+)
+HMPromise.resolve("itheima").then((res) => {
+  console.log(res)
+})
+```
+
+因此，在类的实现中，我们先去判断传入的值是否是一个Promise对象，如果是的话，直接返回该对象；否则，返回一个新的已解决的Promise对象，且其值为传入的值。需要注意静态方法定义前要加上`static`关键字，代码如下：
+
+```javascript
+class HMPromise {
+  // ...
+  static resolve(value) {
+    if (value instanceof HMPromise) {
+      return value // 如果传入的值本身就是一个Promise对象，那么直接返回该对象
+    }
+    return new HMPromise((resolve, reject) => {
+      // 其实这里reject没有定义，也可以省略
+      resolve(value) // 否则，返回一个新的已解决的Promise对象，且其值为传入的值
+    })
+  }
+}
+```
+
+**另外，写到这里再来回顾一下静态属性和静态方法，它们往往会用在和类本身相关的功能上，而不是和实例对象相关的功能上。这些属性或者方法由类直接调用，而不是由实例对象调用，换句话说，只有类的构造函数才能访问到它们。**
