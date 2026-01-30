@@ -2501,3 +2501,26 @@ class HMPromise {
 ```
 
 **另外，写到这里再来回顾一下静态属性和静态方法，它们往往会用在和类本身相关的功能上，而不是和实例对象相关的功能上。这些属性或者方法由类直接调用，而不是由实例对象调用，换句话说，只有类的构造函数才能访问到它们。**
+
+### 9 reject静态方法
+
+`reject`方法用于将一个值转换为一个已拒绝的Promise对象。它返回一个新的已拒绝的Promise对象，且其原因（reason）为传入的值。与 Promise.resolve() 不同，即使 reason 已经是一个 Promise 对象，Promise.reject() 方法也始终会将其封装在一个新的 Promise 对象中。我们给出测试代码：
+
+```javascript
+HMPromise.reject("error").catch((res) => {
+  console.log(res)
+})
+```
+
+因此，在类的实现中，我们直接返回一个新的已拒绝的Promise对象，且其原因为传入的值。代码如下：
+
+```javascript
+class HMPromise {
+  // ...
+  static reject(reason) {
+    return new HMPromise((undefined, reject) => {
+      reject(reason) // 返回一个新的已拒绝的Promise对象，且其原因（reason）为传入的值
+    })
+  }
+}
+```

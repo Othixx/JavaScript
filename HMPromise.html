@@ -144,6 +144,22 @@
         finally(onFinally) {
           return this.then(onFinally, onFinally)
         }
+
+        static resolve(value) {
+          if (value instanceof HMPromise) {
+            return value // 如果传入的值本身就是一个Promise对象，那么直接返回该对象
+          }
+          return new HMPromise((resolve, reject) => {
+            // 其实这里reject没有定义，也可以省略
+            resolve(value) // 否则，返回一个新的已解决的Promise对象，且其值为传入的值
+          })
+        }
+
+        static reject(reason) {
+          return new HMPromise((undefined, reject) => {
+            reject(reason) // 返回一个新的已拒绝的Promise对象，且其原因（reason）为传入的值
+          })
+        }
       }
 
       function resolvePromise(x, p2, resolve, reject) {
@@ -163,34 +179,16 @@
         }
       }
 
-      // ------------- 测试代码 手写Promise  -------------
-      const p = new HMPromise((resolve, reject) => {
-        // resolve("resolve-res")
-        // reject("reject-error")
-        // throw "throw-error"
+      // ------------- 测试代码 -------------
+      HMPromise.reject(
+        new HMPromise((resolve, reject) => {
+          // resolve("resolve")
+          // reject("reject")
+          // throw 'error'
+        }),
+      ).catch((res) => {
+        console.log(res)
       })
-      p.then((res) => {
-        console.log("res:", res)
-      })
-        .catch((err) => {
-          console.log("err:", err)
-        })
-        .finally(() => {
-          console.log("finally")
-        })
-
-      // ------------- 测试代码 原生Promise  -------------
-      // const p = new Promise((resolve, reject) => {
-      //   resolve(1)
-      // })
-      // const p2 = p.then(res => {
-      //   return p2
-      // })
-
-      // p2.then(
-      //   res => { },
-      //   err => { console.log('err:', err) }
-      // )
     </script>
   </body>
 </html>
