@@ -1,0 +1,16 @@
+{
+  "name": "promise-tests",
+  "version": "1.0.0",
+  "description": "",
+  "main": "HMPromise.js",
+  "scripts": {
+    "test": "promises-aplus-tests HMPromise"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "promises-aplus-tests": "^2.1.2"
+  }
+}

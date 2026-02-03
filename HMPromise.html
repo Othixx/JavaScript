@@ -181,6 +181,95 @@
             })
           })
         }
+
+        static all(promises) {
+          // 1. 返回Promise
+          return new HMPromise((resolve, reject) => {
+            // 2. 判断是否为数组
+            if (!Array.isArray(promises))
+              return reject(new TypeError('Argument is not iterable')) // 直接打断后续代码
+            // 3. 空数组直接兑现
+            if (promises.length === 0) return resolve(promises)
+            // 4. 按照顺序记录结果
+            const results = []
+            let count = 0
+            promises.forEach((p, index) => {
+              HMPromise.resolve(p).then(
+                (res) => {
+                  results[index] = res
+                  count++
+                  // 全部完成
+                  if (count === promises.length) {
+                    resolve(results)
+                  }
+                },
+                (err) => {
+                  reject(err) // 只要有一个失败，整体就失败
+                },
+              )
+            })
+          })
+        }
+
+        static allSettled(promises) {
+          // 1. 返回Promise
+          return new HMPromise((resolve, reject) => {
+            // 2. 判断是否为数组
+            if (!Array.isArray(promises))
+              return reject(new TypeError('Argument is not iterable')) // 直接打断后续代码
+            // 3. 空数组直接兑现
+            if (promises.length === 0) return resolve(promises)
+            // 4. 按照顺序记录结果
+            const results = []
+            let count = 0
+            promises.forEach((p, index) => {
+              HMPromise.resolve(p).then(
+                (res) => {
+                  results[index] = { status: FULFILLED, value: res }
+                  count++
+                  if (count === promises.length) resolve(results)
+                },
+                (err) => {
+                  results[index] = { status: REJECTED, reason: err }
+                  count++
+                  if (count === promises.length) resolve(results)
+                },
+              )
+            })
+          })
+        }
+
+        static any(promises) {
+          // 1. 返回Promise
+          return new HMPromise((resolve, reject) => {
+            // 2. 判断是否为数组
+            if (!Array.isArray(promises))
+              return reject(new TypeError('Argument is not iterable')) // 直接打断后续代码
+            // 3. 空数组直接拒绝
+            if (promises.length === 0)
+              return reject(
+                new AggregateError([], 'All promises were rejected'),
+              )
+            // 4. 记录失败结果
+            const errors = []
+            let count = 0
+            promises.forEach((p, index) => {
+              HMPromise.resolve(p).then(
+                (res) => {
+                  resolve(res) // 有一个成功就兑现
+                },
+                (err) => {
+                  errors[index] = err
+                  count++
+                  if (count === promises.length)
+                    reject(
+                      new AggregateError(errors, 'All promises were rejected'),
+                    )
+                },
+              )
+            })
+          })
+        }
       }
 
       function resolvePromise(x, p2, resolve, reject) {
@@ -203,20 +292,22 @@
       // ------------- 测试代码 -------------
       const p1 = new HMPromise((resolve, reject) => {
         setTimeout(() => {
-          resolve(1)
+          reject(1)
         }, 2000)
       })
-      const p2 = new HMPromise((resolve, reject) => {
+      const p2 = HMPromise.reject(2)
+      const p3 = new HMPromise((resolve, reject) => {
         setTimeout(() => {
-          reject(2)
+          // resolve(3)
+          reject(3)
         }, 1000)
       })
-      HMPromise.race([p1, p2, 'itheima']).then(
+      HMPromise.any().then(
         (res) => {
           console.log('res:', res)
         },
         (err) => {
-          console.log('err:', err)
+          console.dir(err)
         },
       )
     </script>

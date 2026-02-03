@@ -2550,7 +2550,7 @@ HMPromise.race([p1, p2, 'itheima']).then(
 )
 ```
 
-需要注意的是，如果race里面的参数传入的不是一个可迭代对象，那么它会报错：TypeError: \*\*\* is not iterable。所以我们一会儿在实现的过程中，不能忘记捕捉这个错误。为了方便起见，我们假设正确的调用中，传入的参数一定是一个数组。
+需要注意的是，如果race里面的参数传入的不是一个可迭代对象，那么它会报错：TypeError: \*\*\* is not iterable。所以我们一会儿在实现的过程中，不能忘记捕捉这个错误。为了方便起见，我们假设正确的调用中，传入的参数一定是一个数组。请注意，这个假设对于后面的all、allSettled、any等方法同样适用。
 
 ![alt text](image-395.png)
 
@@ -2586,3 +2586,218 @@ static race(promises) {
 - HMPromise.race 返回的是一个新的 HMPromise 实例（外层的那个 new HMPromise(...)）。
 - promises.forEach 中的 HMPromise.resolve(p).then(...) 每次确实会返回一个内部的 HMPromise（then 的返回值），但这些返回值没有被使用；它们只是用来监听各个输入何时敲定。
 - 当某个输入先敲定时，会在其 then 的回调里调用外层构造函数提供的 resolve 或 reject，从而敲定并返回给调用者外层的那个 HMPromise。
+
+### 11 all静态方法（面试高频考点）
+
+`all`方法接受一个可迭代对象（通常是一个数组）作为参数，返回一个新的Promise对象，这个Promise对象在所有输入的Promise对象都被解决时被解决，或者在任何一个输入的Promise对象被拒绝时被拒绝。我们给出测试代码：
+
+```javascript
+const p1 = HMPromise.resolve(1)
+const p2 = new HMPromise((resolve, reject) => {
+  setTimeout(() => {
+    // resolve(2)
+    reject('error')
+  }, 1000)
+})
+const p3 = 3
+
+HMPromise.all([p1, p2, p3]).then(
+  (res) => {
+    // HMPromise.all().then(res => {
+    // HMPromise.all([]).then(res => {
+    console.log('res:', res)
+  },
+  (err) => {
+    console.log('err:', err)
+  },
+)
+```
+
+all和刚才的race其实很类似。只不过我们需要注意两点，一个是需要等待所有的都兑现，才能返回兑现结果，空数组则直接兑现；另一个是如果有一个拒绝了，就直接拒绝。
+
+![alt text](image-396.png)
+
+下面给出实现代码，逻辑如果看不懂，就结合着前面的race一起看，因为差不多：
+
+```javascript
+static all(promises) {
+  // 1. 返回Promise
+  return new HMPromise((resolve, reject) => {
+    // 2. 判断是否为数组
+    if (!Array.isArray(promises))
+      return reject(new TypeError('Argument is not iterable')) // 直接打断后续代码
+    // 3. 空数组直接兑现
+    if (promises.length === 0) return resolve(promises)
+    // 4. 按照顺序记录结果
+    const results = []
+    let count = 0
+    promises.forEach((p, index) => {
+      HMPromise.resolve(p).then(
+        (res) => {
+          results[index] = res
+          count++
+          // 全部完成
+          if (count === promises.length) {
+            resolve(results)
+          }
+        },
+        (err) => {
+          reject(err) // 只要有一个失败，整体就失败
+        },
+      )
+    })
+  })
+}
+```
+
+另外再补充一句，在HMPromise的实例化函数里面我们加上return，是为了打断后续代码的执行。咱们需要理清楚，这里面的方法逻辑的作用都在于改变Promise的状态，最终丢给外面的then去处理，而不是在于返回值。
+
+### 12 allSettled静态方法
+
+这个方法和前面的all方法非常相似，而all方法又和race很像，所以当我们写到这一个时，已经感觉此类的静态方法没有什么难度了。Promise.allSettled() 静态方法将一个 Promise 可迭代对象作为输入，并返回一个单独的 Promise。当所有输入的 Promise 都已敲定时（包括传入空的可迭代对象时），返回的 Promise 将被兑现，并带有描述每个 Promise 结果的对象数组。我们来看一下原生的结果：
+
+![alt text](image-397.png)
+
+然后，我们给出测试代码：
+
+```javascript
+const p1 = HMPromise.resolve(1)
+const p2 = 2
+const p3 = new HMPromise((resolve, reject) => {
+  setTimeout(() => {
+    reject(3)
+  }, 1000)
+})
+HMPromise.allSettled([p1, p2, p3]).then(
+  (res) => {
+    console.log('res:', res)
+  },
+  (err) => {
+    console.log('err:', err)
+  },
+)
+```
+
+给出实现代码：
+
+```javascript
+static allSettled(promises) {
+  // 1. 返回Promise
+  return new HMPromise((resolve, reject) => {
+    // 2. 判断是否为数组
+    if (!Array.isArray(promises))
+      return reject(new TypeError('Argument is not iterable')) // 直接打断后续代码
+    // 3. 空数组直接兑现
+    if (promises.length === 0) return resolve(promises)
+    // 4. 按照顺序记录结果
+    const results = []
+    let count = 0
+    promises.forEach((p, index) => {
+      HMPromise.resolve(p).then(
+        (res) => {
+          results[index] = { status: FULFILLED, value: res }
+          count++
+          if (count === promises.length) resolve(results)
+        },
+        (err) => {
+          results[index] = { status: REJECTED, reason: err }
+          count++
+          if (count === promises.length) resolve(results)
+        },
+      )
+    })
+  })
+}
+```
+
+### 13 any静态方法
+
+与前面的allSettled方法一样，这个方法不是很熟，我们先搞清楚它究竟干了什么。它也是接受一个可迭代对象（通常是一个数组）作为参数，返回一个新的Promise对象，这个Promise对象在任何一个输入的Promise对象被解决时被解决，或者在所有输入的Promise对象都被拒绝时被拒绝，拒绝的话返回一个AggregateError。如果传入空数组，那么也会被拒绝，并抛出一个AggregateError异常。我们来看一下原生的结果：
+
+![alt text](image-398.png)
+
+下面给出测试代码：
+
+```javascript
+const p1 = new HMPromise((resolve, reject) => {
+  setTimeout(() => {
+    reject(1)
+  }, 2000)
+})
+const p2 = 2
+const p3 = new HMPromise((resolve, reject) => {
+  setTimeout(() => {
+    resolve(3)
+    // reject(3)
+  }, 1000)
+})
+HMPromise.any([p1, p2, p3]).then(
+  (res) => {
+    console.log('res:', res)
+  },
+  (err) => {
+    console.dir(err)
+  },
+)
+```
+
+给出实现代码：
+
+```javascript
+static any(promises) {
+  // 1. 返回Promise
+  return new HMPromise((resolve, reject) => {
+    // 2. 判断是否为数组
+    if (!Array.isArray(promises))
+      return reject(new TypeError('Argument is not iterable')) // 直接打断后续代码
+    // 3. 空数组直接拒绝
+    if (promises.length === 0)
+      return reject(
+        new AggregateError([], 'All promises were rejected'),
+      )
+    // 4. 记录失败结果
+    const errors = []
+    let count = 0
+    promises.forEach((p, index) => {
+      HMPromise.resolve(p).then(
+        (res) => {
+          resolve(res) // 有一个成功就兑现
+        },
+        (err) => {
+          errors[index] = err
+          count++
+          if (count === promises.length)
+            reject(
+              new AggregateError(errors, 'All promises were rejected'),
+            )
+        },
+      )
+    })
+  })
+}
+```
+
+至此，我们手写Promise的核心功能已经全部完成。如果需要实现A+规范，那么还需要修改resolvePromise函数的一些细节，在此不再赘述，可参见目录下面的promise-tests文件夹。
+
+## Day 3 - 函数柯里化、JS设计模式
+
+### 1 函数柯里化
+
+### 1.1 概念
+
+我们先来看一下它的简单介绍，以及一个简单的改写：
+
+![alt text](image-399.png)
+
+### 1.2 面试题
+
+![alt text](image-400.png)
+
+我们来看一下这个面试题的实现代码：
+
+![alt text](image-401.png)
+
+需要注意的是，最后那里的sum我们不加括号，不传参数：
+
+- return sum 返回的是函数本身（函数对象），供后续调用继续传参；这利用了闭包，nums 在外层作用域中持续保存已收集的参数。
+- 如果写成 return sum() 就会立即调用 sum（而不是把它作为可被下次调用的函数返回），这不是我们想要的行为；我们需要把“等待更多参数”的函数返回给调用者，让调用链继续（例如 sum(1)(2,3)(4)(5)）。
