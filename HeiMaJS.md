@@ -2839,3 +2839,73 @@ static any(promises) {
 ![alt text](image-406.png)
 
 看上面的一个实现方法，就是单例的思想。此外，vant的toast和notify组件中也有单例的思想。Vue2和Vue3的use方法中都使用到了单例思想，我们要会结合源码进行分析。
+
+#### 2.3 观察者模式
+
+![alt text](image-407.png)
+
+看上图，目标对象只有一个，当目标对象的状态发生改变时，它上面定义的一个或多个观察者会收到通知，执行指定的方法。
+
+#### 2.4 发布订阅模式
+
+![alt text](image-408.png)
+
+如上图，发布订阅模式依赖事件总线。我们知道，在Vue2里面，可以使用$on、$emit、$off等方法来实现发布订阅模式，在Vue3中，它被移除，我们只能使用一些第三方的库来引入，或者索性自己手写一个来实现。
+
+在下面的部分，我们就来尝试手写发布订阅模式，实现$on、$emit、$off、$once四个方法。
+
+##### 2.4.1 实现$on和$emit
+
+![alt text](image-409.png)
+
+```javascript
+class HMEmitter {
+  // 构造函数可以为空
+
+  #handlers = {} // 用来保存事件和回调函数的映射关系，其中回调函数需要存在一个数组中
+
+  $on(event, callback) {
+    if (this.#handlers[event] === undefined) this.#handlers[event] = [] // 如果事件不存在，就创建一个空数组
+    this.#handlers[event].push(callback)
+  }
+
+  $emit(event, ...args) {
+    if (this.#handlers[event] === undefined) return // 如果事件不存在，就直接返回
+    this.#handlers[event].forEach((callback) => callback(...args)) // 否则，遍历事件对应的回调函数数组，执行每个回调函数
+  }
+}
+```
+
+另外，在这里我们还需要注意一下它的测试代码：
+
+```javascript
+// 注册事件
+document.querySelector('.on').addEventListener('click', () => {
+  bus.$on('event1', () => {
+    console.log('回调函数1')
+  })
+  bus.$on('event2', (name, info) => {
+    console.log(name, info)
+  })
+  bus.$on('event2', (name, info) => {
+    console.log('event2的第二个回调函数', name, info)
+  })
+})
+// 触发事件
+document.querySelector('.emit').addEventListener('click', () => {
+  bus.$emit('event1')
+  bus.$emit('event2', 'itheima', '666')
+})
+```
+
+有个细节需要注意的是，上面的两个回调函数，所需要的参数个数均为2个，和我们下面传入的参数个数一致。但是如果我们传入的参数个数小于2个，或者大于2个，会发生什么呢？
+
+1. **回调函数需要的参数少于传递的参数**：
+
+- 多余的参数会被忽略，不会影响函数执行
+- 例如：在您的代码中，`event1` 的回调函数不需要参数，但如果您调用 `bus.$emit('event1', '参数1', '参数2')`，回调函数仍然会正常执行，只是不会使用这些参数
+
+2. **回调函数需要的参数多于传递的参数**：
+
+- 缺少的参数会被设置为 `undefined`
+- 例如：如果您注册一个回调函数 `(name, info, age) => { console.log(name, info, age) }`，但触发时只传递了两个参数 `bus.$emit('event2', 'itheima', '666')`，那么 `age` 会是 `undefined`
