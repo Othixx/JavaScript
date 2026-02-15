@@ -2954,3 +2954,81 @@ $once(event, callback) {
 比较好理解，也不过多赘述。
 
 #### 2.7 迭代器模式
+
+##### 2.7.1 for...in 和 for...of
+
+```javascript
+/**
+ * for in语句可以遍历一个对象的除[Symbol]以外的[可枚举]属性，包括继承的可枚举属性。
+ *  1. 遍历的是索引
+ *  2. 继承而来的也可以遍历出来(原型链上动态增加的也可以遍历)
+ * */
+for (const key in foods) {
+  console.log('key:', key)
+}
+
+/**
+ * for of语句可以遍历 可迭代对象
+ * 包括 Array，Map，Set，String，TypedArray，arguments 对象等等
+ * 1. 遍历的是值
+ * 2. 继承而来的无法遍历
+ * */
+for (const iterator of foods) {
+  console.log('iterator:', iterator)
+}
+```
+
+我们直接去看上面的两个实例，方便理解。所谓的迭代器，就是按照一定的逻辑去遍历（迭代）。
+
+![alt text](image-413.png)
+
+##### 2.7.2 迭代协议
+
+```javascript
+// ------------- 迭代协议 -------------
+/**
+ * 迭代协议可以定制对象的迭代行为  分为2个协议:
+ *  1. 可迭代协议: 增加方法[Symbol.iterator](){} 返回符合 迭代器协议 的对象
+ *  2. 迭代器协议:
+ *      有next方法的对象,next方法返回:
+ *        已结束: {done:true}
+ *        继续迭代: {done:false,value:'x'}
+ *    使用Generator
+ *    自己实现 对象,next
+ * */
+const obj = {
+  // Symbol.iterator 内置的常量
+  // [属性名表达式]
+  [Symbol.iterator]() {
+    // ------------- 自己实现 -------------
+    const arr = ['北京', '上海', '广州', '深圳']
+    let index = 0
+
+    return {
+      next() {
+        if (index < arr.length) {
+          // 可以继续迭代
+          return { done: false, value: arr[index++] }
+        }
+        // 迭代完毕
+        return { done: true }
+      },
+    }
+
+    // ------------- 使用Generator -------------
+    // function* foodGenerator() {
+    //   yield '西兰花'
+    //   yield '花菜'
+    //   yield '西兰花炒蛋'
+    // }
+    // const food = foodGenerator()
+    // return food
+  },
+}
+
+for (const iterator of obj) {
+  console.log('iterator:', iterator)
+}
+```
+
+我们直接去看上面的代码，方便理解。
