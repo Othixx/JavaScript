@@ -1,3 +1,7 @@
-const arr = []
-arr[5] = 0
-console.log(arr) // Output: 6
+let variable = null
+
+if (typeof variable === 'object' && variable == null) {
+  console.log('变量是null')
+} else {
+  console.log('变量不是null')
+}
