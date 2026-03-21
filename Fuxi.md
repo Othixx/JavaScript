@@ -91,3 +91,18 @@ if (Object.is(variable, null)) {
   console.log('变量不是null')
 }
 ```
+
+# 2026.3.21
+
+关于JS的==和===，只在下面给出几个例子去体会：
+
+```javascript
+console.log(1 == '1') // true
+console.log(true == 1) // true
+console.log(null == undefined) // true
+
+console.log(1 === '1') // false
+console.log(true === 1) // false
+console.log(null === undefined) // false
+console.log(1 === 1) // true
+```
