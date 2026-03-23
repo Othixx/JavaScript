@@ -49,7 +49,9 @@ border 三种属性 四个方向：
 ## 3.2 深入理解CSS（下）
 
 ![alt text](image-14.png)
+
 ![alt text](image.png)
+
 ![alt text](image-1.png)
 
 ### 3.2.1 CSS盒模型——块级元素
@@ -162,7 +164,7 @@ https://juejin.cn/post/7001033897878224926
 
 **高阶函数那部分有点难，没怎么搞懂。**
 
-*React Hooks的使用，就是一个很好的过程抽象的例子。
+\*React Hooks的使用，就是一个很好的过程抽象的例子。
 
 ### 4.3.1 过程抽象/HOF高阶函数/装饰器
 
@@ -253,23 +255,25 @@ JavaScript 的引用数据类型包括：
 
 ```typescript
 interface Person {
-    name: string;
-    age: number;
-    greet(): void;
+  name: string
+  age: number
+  greet(): void
 }
 
 class Student implements Person {
-    name: string;
-    age: number;
-    
-    constructor(name: string, age: number) {
-        this.name = name;
-        this.age = age;
-    }
+  name: string
+  age: number
 
-    greet() {
-        console.log(`Hello, my name is ${this.name} and I am ${this.age} years old.`);
-    }
+  constructor(name: string, age: number) {
+    this.name = name
+    this.age = age
+  }
+
+  greet() {
+    console.log(
+      `Hello, my name is ${this.name} and I am ${this.age} years old.`,
+    )
+  }
 }
 ```
 
@@ -278,14 +282,14 @@ class Student implements Person {
 函数重载（Function Overloading）允许一个函数根据传入参数的不同而具有不同的实现。在 TypeScript 中，可以为同一个函数提供多个函数类型定义，以实现函数重载。
 
 ```typescript
-function add(a: number, b: number): number;
-function add(a: string, b: string): string;
+function add(a: number, b: number): number
+function add(a: string, b: string): string
 function add(a: any, b: any): any {
-    return a + b;
+  return a + b
 }
 
-console.log(add(1, 2)); // 输出: 3
-console.log(add('Hello, ', 'world!')); // 输出: Hello, world!
+console.log(add(1, 2)) // 输出: 3
+console.log(add('Hello, ', 'world!')) // 输出: Hello, world!
 ```
 
 ### 5.3.3 类与继承
@@ -294,26 +298,26 @@ console.log(add('Hello, ', 'world!')); // 输出: Hello, world!
 
 ```typescript
 class Animal {
-    name: string;
+  name: string
 
-    constructor(name: string) {
-        this.name = name;
-    }
+  constructor(name: string) {
+    this.name = name
+  }
 
-    move(distance: number = 0) {
-        console.log(`${this.name} moved ${distance} meters.`);
-    }
+  move(distance: number = 0) {
+    console.log(`${this.name} moved ${distance} meters.`)
+  }
 }
 
 class Dog extends Animal {
-    bark() {
-        console.log('Woof! Woof!');
-    }
+  bark() {
+    console.log('Woof! Woof!')
+  }
 }
 
-const dog = new Dog('Buddy');
-dog.bark(); // 输出: Woof! Woof!
-dog.move(10); // 输出: Buddy moved 10 meters.
+const dog = new Dog('Buddy')
+dog.bark() // 输出: Woof! Woof!
+dog.move(10) // 输出: Buddy moved 10 meters.
 ```
 
 通过接口、函数重载、类与继承，TypeScript 提供了强大的面向对象编程能力，使得代码更加结构化和可维护。
@@ -327,9 +331,9 @@ TypeScript 提供了一些高级类型，使得开发者可以更灵活地定义
 联合类型表示一个值可以是几种类型之一。使用竖线 (`|`) 分隔每个类型。
 
 ```typescript
-let value: string | number;
-value = "Hello"; // 合法
-value = 42; // 合法
+let value: string | number
+value = 'Hello' // 合法
+value = 42 // 合法
 // value = true; // 非法
 ```
 
@@ -359,11 +363,11 @@ let staffMember: Staff = {
 类型断言用于手动指定一个值的类型。它可以通过两种方式实现：尖括号语法和 as 语法。
 
 ```typescript
-let someValue: any = "this is a string";
-let strLength: number = (<string>someValue).length;
+let someValue: any = 'this is a string'
+let strLength: number = (<string>someValue).length
 
-let someValue2: any = "this is another string";
-let strLength2: number = (someValue2 as string).length;
+let someValue2: any = 'this is another string'
+let strLength2: number = (someValue2 as string).length
 ```
 
 ### 5.4.4 类型别名（Type Aliases）
@@ -371,11 +375,11 @@ let strLength2: number = (someValue2 as string).length;
 类型别名用于为类型创建一个新名称。它可以用于原始值、联合类型、交叉类型以及任何你需要手动定义的类型。
 
 ```typescript
-type StringOrNumber = string | number;
+type StringOrNumber = string | number
 
-let value1: StringOrNumber;
-value1 = "Hello"; // 合法
-value1 = 42; // 合法
+let value1: StringOrNumber
+value1 = 'Hello' // 合法
+value1 = 42 // 合法
 // value1 = true; // 非法
 ```
 
@@ -387,11 +391,11 @@ value1 = 42; // 合法
 
 ```typescript
 function identity<T>(arg: T): T {
-    return arg;
+  return arg
 }
 
-let output = identity<string>("Hello, TypeScript!");
-console.log(output); // 输出: Hello, TypeScript!
+let output = identity<string>('Hello, TypeScript!')
+console.log(output) // 输出: Hello, TypeScript!
 ```
 
 ![alt text](image-25.png)
@@ -423,7 +427,7 @@ roadmap.sh 这个网站可以看一下。
 
 # 7 HTTP实用指南
 
-*Restful API
+\*Restful API
 
 请求头与响应头（面试常考）
 ![alt text](image-38.png)

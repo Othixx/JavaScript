@@ -94,7 +94,7 @@ if (Object.is(variable, null)) {
 
 # 2026.3.21
 
-关于JS的==和===，只在下面给出几个例子去体会：
+关于JS的 == 和 ===，只在下面给出几个例子去体会：
 
 ```javascript
 console.log(1 == '1') // true
@@ -119,9 +119,15 @@ console.log(1 === 1) // true
 
 display的block、inline、还有inline-block属性：
 
-这个题也经常问，我们从字面意思上去理解，block就是块级元素，inline就是行内元素，inline-block就是行内块元素。
+这个题也经常问，我们从字面意思上去理解，block就是块级元素，inline就是行内元素，inline-block就是行内块元素。另外，我们还需要再清楚一点：display属性是CSS中用来控制元素显示类型的核心属性，它可以改变元素的默认行为，实现不同的布局效果。具体来说：
 
 ![alt text](image-414.png)
+
+除了上述三种，display还有其他常用值，例如：
+
+- display: flex：弹性布局，用于一维（行或列）排列。
+- display: grid：网格布局，用于二维（行和列）排列。
+- display: none：元素隐藏且不占据空间。
 
 接下来我们来看几个效果，首先是block：
 
@@ -136,3 +142,7 @@ display的block、inline、还有inline-block属性：
 最后就是inline-block，这个还好理解：
 
 ![alt text](image-417.png)
+
+另外我们再来看一下常见的行级元素和块级元素：
+
+![alt text](image-1.png)
