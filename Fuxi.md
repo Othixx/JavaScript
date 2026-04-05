@@ -146,3 +146,62 @@ display的block、inline、还有inline-block属性：
 另外我们再来看一下常见的行级元素和块级元素：
 
 ![alt text](image-1.png)
+
+# 2026.4.5
+
+Vue2和Vue3的生命周期对比：这个知识点我们要知道①首先它们的生命周期函数叫法发生了改变，Vue2的生命周期函数是：beforeCreate、created、beforeMount、mounted、beforeUpdate、updated、beforeDestroy、destroyed。Vue3的生命周期函数是：setup（这个setup把beforeCreate和created合到了一起）、onBeforeMount、onMounted、onBeforeUpdate、onUpdated、onBeforeUnmount、onUnmounted。
+
+②同时我们要知道，在Vue3的内部逻辑里，setup()函数比Vue2中的beforeCreate()、created()函数更早执行，我们可以在setup()函数中初始化一些数据，然后再把它return出去，这样在template里面我们可以直接使用这些数据。同时我们也要知道，由于setup函数执行的时候，组件实例并没有被创建，因此在Vue3的setup()函数中是没有this的。
+
+③此外，Vue3的生命周期函数，都需要import后去使用，这也是组合式API的一种函数式编程风格。实际上，在Vue3的任何生命周期函数里都没有this。这是因为在函数式编程之后，我们不再需要使用this来访问组件实例的属性和方法。
+
+关于上面的说法，看一个例子：
+
+Vue2：
+
+```vue
+<template>
+  <div ref="container">Hello</div>
+</template>
+
+<script>
+export default {
+  mounted() {
+    // 使用 this 访问组件实例的 $refs
+    console.log(this.$refs.container) // 输出 DOM 元素
+    this.$refs.container.style.color = 'red' // 修改样式
+  },
+}
+</script>
+```
+
+Vue3:
+
+```vue
+<template>
+  <div ref="container">Hello</div>
+</template>
+
+<script setup>
+import { onMounted, ref } from 'vue'
+
+// 定义 ref 引用 DOM 元素
+const container = ref(null)
+
+onMounted(() => {
+  // 直接访问 ref 的 value 属性，无 this
+  console.log(container.value) // 输出 DOM 元素
+  container.value.style.color = 'red' // 修改样式
+})
+</script>
+```
+
+ref和reactive的区别：
+
+![alt text](image-328.png)
+
+请注意，reactive只能定义对象型的数据。另外在template中ref定义的数据可以直接使用，不需要加.value，要加的地方是在script中。
+
+原型/原型链：看下面这张图就可以
+
+![alt text](image-128.png)
