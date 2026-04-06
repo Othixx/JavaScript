@@ -43,10 +43,15 @@ result() // 2
 关于更多的`this`指向，看下面的几个例子好好体会：
 
 ![alt text](image-106.png)
+
 ![alt text](image-107.png)
+
 ![alt text](image-108.png)
+
 ![alt text](image-109.png)
+
 ![alt text](image-110.png)
+
 对最后一张图的理解：在对象方法中的箭头函数，`this`指向外部作用域，原因是**对象字面量不产生作用域**，所以最后一张图的`this`指向`window`，另外第二张图也可以用这个来解释，具体见：https://blog.csdn.net/2301_81854535/article/details/148829976
 
 模板字符串：需要知道它就是用反引号``来定义的，它可以直接在字符串中插入变量，而不需要用加号拼接。
@@ -146,6 +151,48 @@ display的block、inline、还有inline-block属性：
 另外我们再来看一下常见的行级元素和块级元素：
 
 ![alt text](image-1.png)
+
+# 2026.3.24（感觉BFC记不住）
+
+BFC：
+
+【前端面试：什么是BFC？如何解决BFC带来的问题？】 https://www.bilibili.com/video/BV1irqTYUEhP/?share_source=copy_web&vd_source=adb76b0abd2583fe45600a97ce5e6760
+
+这个概念初学时没怎么搞懂，其实说白了，BFC主要用于解决两个问题，一个是**margin合并**，另一个是**浮动塌陷**。今天复习先学到了一个概念，就是CSS中的**margin合并**：
+
+当两个块级元素的**垂直外边距**相邻时，它们的外边距会合并。例如，一个元素的 margin-bottom 和另一个元素的 margin-top 会合并，最终的外边距高度为两者的**较大值**。
+
+我们说解决上述问题的一个办法，就是使用BFC：
+
+![alt text](image-418.png)
+
+如上图所示，把一个盒子放入到BFC容器里，就可以解决margin合并的问题。
+
+那么BFC究竟是干什么的呢？
+
+BFC全称叫做块级格式化上下文（Block Formatting Context），它是一个完全独立的空间（布局环境），让空间里的子元素不会影响到外面的布局。
+
+面试中常考触发BFC的方法，总结如下：
+
+![alt text](image-419.png)
+
+（其中table-cell是表格单元格布局）
+
+上面有规律可循，其实就是**当元素需要独立管理内部布局或者避免外部干扰时**，浏览器会触发BFC。
+
+上面说完了margin合并以及常见的触发BFC的方式，我们再来看第二个内容：**浮动塌陷**。在理解这个之前，我们先来看BFC的三个特性：
+
+![alt text](image-421.png)
+
+前面两个我们已经讲过了，我们来理解第三个：
+
+我们来看下面的一段代码：
+
+![alt text](image-420.png)
+
+（图中有一部分被文字挡住了，它和下面一行代码相同也是box）
+
+由于这个box是个浮动元素（设置了float），当元素浮动起来后，普通的父元素就不会去计算这个浮动元素的高度，所以导致父元素会认为自己的高度为0，我们给container设置了颜色，但是显然是看不到的。这个时候，如果我们把container给加一层属性比如display: inline-block，目的是把它变成BFC，那么在这个BFC中就会去计算浮动元素的高度，从而黑色背景就会正常显示了。
 
 # 2026.4.5
 
