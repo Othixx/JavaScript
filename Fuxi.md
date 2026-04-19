@@ -252,3 +252,78 @@ ref和reactive的区别：
 原型/原型链：看下面这张图就可以
 
 ![alt text](image-128.png)
+
+# 2026.4.19
+
+JS的三种常见实现继承的方式：①简单原型链继承、②ES5寄生组合式继承、③ES6 extends语法实现现代继承。以上的三种写法，我们在面试中要都能默写出来。
+
+①简单原型链继承：
+
+```javascript
+function Parent() {
+  this.name = 'parent'
+}
+Parent.prototype.say = function () {
+  console.log('hello')
+}
+
+function Child() {}
+// 核心：子类原型 = 父类实例
+Child.prototype = new Parent()
+
+const child = new Child()
+child.say() // hello
+```
+
+该种写法主要存在两个问题：①Parent中的引用属性，因为子类是new了一个Parent实例出来，作为所有Child的原型对象，导致所有由Child new出来的子类都会共用这同一引用属性，一旦对其修改，所有子类都会发生变化②子类也不能向父类的构造函数传参。
+
+②ES5 寄生组合式继承：
+
+```javascript
+function Parent(name) {
+  this.name = name
+}
+Parent.prototype.say = function () {
+  console.log(this.name)
+}
+
+function Child(name, age) {
+  // 借用构造函数继承属性
+  Parent.call(this, name)
+  this.age = age
+}
+
+// 核心：继承原型，不调用父构造函数
+Child.prototype = Object.create(Parent.prototype)
+Child.prototype.constructor = Child
+
+const child = new Child('zs', 18)
+child.say() // zs
+```
+
+我们说所谓的寄生组合式继承，就是通过借用构造函数来继承属性，通过`call`方法，实现子类可以在父类的构造函数中传参，同时也可以避免之前的引用类型共用问题；通过原型链的混成形式来继承方法。
+
+③ES6 extends继承：
+
+```javascript
+class Parent {
+  constructor(name) {
+    this.name = name
+  }
+  say() {
+    console.log(this.name)
+  }
+}
+
+class Child extends Parent {
+  constructor(name, age) {
+    super(name) // 必须先调用super
+    this.age = age
+  }
+}
+
+const child = new Child('ls', 20)
+child.say() // ls
+```
+
+是语法糖，本质上还是一个寄生组合式继承。
