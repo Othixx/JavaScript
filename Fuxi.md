@@ -277,6 +277,10 @@ child.say() // hello
 
 该种写法主要存在两个问题：①Parent中的引用属性，因为子类是new了一个Parent实例出来，作为所有Child的原型对象，导致所有由Child new出来的子类都会共用这同一引用属性，一旦对其修改，所有子类都会发生变化②子类也不能向父类的构造函数传参。
 
+另：基本类型为什么不乱？
+
+![alt text](image-422.png)
+
 ②ES5 寄生组合式继承：
 
 ```javascript
@@ -327,3 +331,47 @@ child.say() // ls
 ```
 
 是语法糖，本质上还是一个寄生组合式继承。
+
+# 2026.4.20
+
+对于事件循环的宏任务与微任务这个知识点，我们不再讲了，直接去看HeiMaAJAX.md里面的“事件循环中的宏任务与微任务”这一节即可，搞定那两个问题就没问题了。
+
+我们需要注意，目前学过的东西，只有Promise.then()/.catch()/.finally()，以及async/await属于微任务，其他都是宏任务。
+
+防抖与节流：这两个知识点我们就是要求会自己手写，两个的核心都是用到了定时器。先来手写一下防抖，防抖的作用是，如果在一段时间内频繁触发了一个事件，那么只执行最后一个，就像是我们如果快速在搜索引擎的输入框打字时，只返回最后一次输入的结果。
+
+```javascript
+function debounce(fn, delay) {
+  let t = null
+  return function () {
+    if (t !== null) {
+      clearTimeout(t)
+    }
+    t = setTimeout(() => {
+      fn.call(this)
+    }, delay)
+  }
+}
+```
+
+记忆关键点：
+
+- 闭包保存 timer。
+- 每次触发时 clearTimeout(timer)。
+- 用 setTimeout 延迟执行。
+
+对于节流：其实就是打王者释放技能，每一定的时间里只能释放一次该技能：
+
+```javascript
+function throttle(fn, t) {
+  let timer = null
+  return function () {
+    if (!timer) {
+      timer = setTimeout(function () {
+        fn()
+        timer = null // 清空定时器
+      }, t)
+    }
+  }
+}
+```

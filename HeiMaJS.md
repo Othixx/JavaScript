@@ -1230,6 +1230,7 @@ greetAlice() // Outputs: { name: 'alice', greet: [Function: greet] }
 ### 4. 性能优化
 
 主要包括防抖和节流：
+
 ![alt text](image-142.png)
 
 #### 4.1 防抖（debounce）
@@ -1328,9 +1329,24 @@ function debounce(fn, delay) {
 
 #### 4.2 节流（throttle）
 
-节流是指在一定时间内只允许函数执行一次，如果在这段时间内又触发了事件，则会忽略掉。节流可以用来限制函数的执行频率，避免频繁触发事件导致性能问题。和防抖一样，同样可以使用`lodash`库的`throttle`方法或手写节流函数来实现。在这里省略调库的方法，我们直接看手写：
+节流是指在一定时间内只允许函数执行一次，如果在这段时间内又触发了事件，则会忽略掉。节流可以用来限制函数的执行频率，避免频繁触发事件导致性能问题。和防抖一样，同样可以使用`lodash`库的`throttle`方法或手写节流函数来实现。
+
+先给出调库的方法：
+
+```javascript
+const _ = require('lodash')
+const box = document.querySelector('.box')
+let i = 1
+function mouseMove() {
+  box.innerHTML = i++
+}
+box.addEventListener('mousemove', _.throttle(mouseMove, 500)) // 500毫秒内执行一次
+```
+
+下面我们我们来看手写：
 
 ![alt text](image-144.png)
+
 ![alt text](image-143.png)
 
 有了防抖的基础之后，上面的代码就很好理解了。**需要注意的是，我们清空定时器的时候必须写成`timer = null`的形式而不能是`clearTimeout(timer)`，是因为我们的这句话写在`setTimeout()`的回调函数中，如果直接调用`clearTimeout(timer)`，那么会无法正确清除定时器。**
