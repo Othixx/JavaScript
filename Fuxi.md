@@ -359,18 +359,19 @@ function debounce(fn, delay) {
 - 闭包保存 timer。
 - 每次触发时 clearTimeout(timer)。
 - 用 setTimeout 延迟执行。
+- 需要用到`call`。
 
 对于节流：其实就是打王者释放技能，每一定的时间里只能释放一次该技能：
 
 ```javascript
-function throttle(fn, t) {
-  let timer = null
+function throttle(fn, delay) {
+  let t = null
   return function () {
-    if (!timer) {
-      timer = setTimeout(function () {
+    if (!t) {
+      t = setTimeout(() => {
         fn()
-        timer = null // 清空定时器
-      }, t)
+        t = null
+      }, delay)
     }
   }
 }

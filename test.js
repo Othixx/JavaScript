@@ -1,7 +1,27 @@
-let variable = null
+// 防抖
+// 名字叫做debounce，延迟时间为delay，调用函数为fn
+function debounce(fn, delay) {
+  let t = null
+  return function () {
+    if (t !== null) {
+      clearTimeout(t)
+    }
+    t = setTimeout(() => {
+      fn.call(this)
+    }, delay)
+  }
+}
 
-if (typeof variable === 'object' && variable == null) {
-  console.log('变量是null')
-} else {
-  console.log('变量不是null')
+// 节流
+// 名字叫做throttle，延迟时间和函数仍旧为delay和fn
+function throttle(fn, delay) {
+  let t = null
+  return function () {
+    if (!t) {
+      t = setTimeout(() => {
+        fn()
+        t = null
+      }, delay)
+    }
+  }
 }
