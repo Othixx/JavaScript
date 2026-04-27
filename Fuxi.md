@@ -369,10 +369,12 @@ function throttle(fn, delay) {
   return function () {
     if (!t) {
       t = setTimeout(() => {
-        fn()
+        fn.call(this)
         t = null
       }, delay)
     }
   }
 }
 ```
+
+**请注意，如果直接赋值`t = null`，并不会阻止定时器的执行！！！所以在防抖函数中，我们需要使用`clearTimeout`来清除定时器。**
