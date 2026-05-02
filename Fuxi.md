@@ -378,3 +378,153 @@ function throttle(fn, delay) {
 ```
 
 **请注意，如果直接赋值`t = null`，并不会阻止定时器的执行！！！所以在防抖函数中，我们需要使用`clearTimeout`来清除定时器。**
+
+# 2026.5.2
+
+CSS中Flex布局实现圣杯布局、双飞翼布局：
+
+①我们首先要知道，什么是圣杯布局，什么是双飞翼布局。它们两者要实现的最终页面效果一模一样：页面分为三栏：左边固定、中间自适应最宽、右边固定。上下还有通栏的头部和底部。
+
+而关键的区别在于，圣杯布局的代码结构顺序，和我们在页面上看到的顺序是一模一样的；双飞翼布局，则是通过了CSS，把内容最多的中间部分放在代码的最前面。这就导致了双飞翼布局在网速比较慢的时候，优先加载重要内容，性能比圣杯布局要好。
+
+②下来看一段圣杯布局的代码，了解一下Flex布局：
+
+```javascript
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>Flex 圣杯布局</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      height: 100%;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+    /* 头部底部 */
+    header, footer {
+      height: 60px;
+      background: #333;
+      color: #fff;
+      text-align: center;
+      line-height: 60px;
+    }
+    /* 中间容器 */
+    .container {
+      flex: 1;
+      display: flex;
+    }
+    /* 左侧侧边栏 */
+    .left {
+      width: 200px;
+      background: #666;
+    }
+    /* 中间主体 */
+    .main {
+      flex: 1;
+      background: #eee;
+    }
+    /* 右侧侧边栏 */
+    .right {
+      width: 200px;
+      background: #999;
+    }
+  </style>
+</head>
+<body>
+  <header>头部</header>
+  <div class="container">
+    <div class="left">左栏</div>
+    <div class="main">中间主体（自适应）</div>
+    <div class="right">右栏</div>
+  </div>
+  <footer>底部</footer>
+</body>
+</html>
+```
+
+③而双飞翼布局，通过设置order实现：
+
+```javascript
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>Flex 双飞翼布局</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html,body {
+      height: 100%;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+    header, footer {
+      height: 60px;
+      background: #222;
+      color: #fff;
+      text-align: center;
+      line-height: 60px;
+    }
+    .wrap {
+      flex: 1;
+      display: flex;
+    }
+    /* 中间主体放最前面 */
+    .main {
+      flex: 1;
+      background: #f5f5f5;
+    }
+    .left {
+      width: 200px;
+      background: #444;
+      /* 调整顺序 */
+      order: -1;
+    }
+    .right {
+      width: 200px;
+      background: #777;
+    }
+  </style>
+</head>
+<body>
+  <header>头部</header>
+  <div class="wrap">
+    <div class="main">中间主体（DOM优先渲染）</div>
+    <div class="left">左栏</div>
+    <div class="right">右栏</div>
+  </div>
+  <footer>底部</footer>
+</body>
+</html>
+```
+
+④关于Flex的一些细碎知识点：
+
+(i) flex: 1，这玩意儿实际上是`flex-grow: 1; flex-shrink: 1; flex-basis: 0%;`这三个玩意儿的合写，具体可以问豆包，我们只需要知道，如果一个元素设置的flex: 1, 另一个设置的flex: 2，那么这两个占盒子的比例就是1:2。
+
+(ii) flex-direction：主轴方向，设置为row时，里面的元素从左向右排，设置为column时，从上到下排。
+
+媒体查询：这个概念是我在复习的时候新学的，之前没有学过，比较简单好理解。首先我们要知道什么叫做响应式Web设计，就是我的视口宽度发生变化时，比如说从电脑换到手机后，我们的同一套代码要实现手机的排版也是好看的，自动发生变化，这就是响应式设计。这可以通过媒体查询来实现。
+
+![alt text](image-423.png)
+
+一般采用上面的简写形式。
+
+![alt text](image-424.png)
+
+![alt text](image-425.png)
+
+另外我们需要注意一下媒体查询的书写顺序，由于CSS会层叠覆盖的原因。如上图所示，用脑子简单想想就能想明白。
