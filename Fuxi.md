@@ -625,3 +625,41 @@ localStorage：适合存储用户信息、主题设置等持久化的数据。
 sessionStorage：适合存储临时表单数据，防止刷新丢失，存页面间传递的临时数据。
 
 cookie：适合存储用户登录状态、以及需要随请求发送的少量数据。
+
+数组扁平化：在真实业务中，我们往往会拿到多层的数组套数组的结构，这个时候往往我们要把它展平成一维的，方便后续业务的开展。在JS中我们有一个API可以直接调用，就是`Array.flat(depth)`方法，其中depth代表层数，代表了你想展开几层。
+
+此外，在面试中面试官可能要求我们手写实现数组扁平化，那么使用数组的`reduce`递归一定要会，其实很好理解，代码见下：
+
+```javascript
+function flatArr(arr) {
+  return arr.reduce((prev, cur) => {
+    return prev.concat(Array.isArray(cur) ? flatArr(cur) : cur)
+  }, [])
+}
+flatArr(arr)
+```
+
+再来回顾一下，对于深拷贝和浅拷贝，只针对引用类型。浅拷贝是指只复制对象的第一层属性，如果属性是引用类型，则只复制引用地址。也就是说，如果原对象的有某些属性是引用类型，那么拷贝后的新对象和原对象的那些属性仍然指向同一个内存地址，修改新对象的属性仍旧会影响原对象。我们有三种办法去实现深拷贝。第一种方法是手写，见下：
+
+```javascript
+const o = {}
+function deepCopy(newObj, oldObj) {
+  for (let k in oldObj) {
+    // 遍历对象用for in，k是属性名，oldObj[k]是属性值
+    if (oldObj[k] instanceof Array) {
+      newObj[k] = [] // 如果是数组，先创建一个新数组
+      deepCopy(newObj[k], oldObj[k]) // 递归拷贝数组元素
+    } else if (oldObj[k] instanceof Object) {
+      newObj[k] = {} // 如果是对象，先创建一个新对象
+      deepCopy(newObj[k], oldObj[k]) // 递归拷贝对象属性
+    } else {
+      newObj[k] = oldObj[k] // 浅拷贝
+    }
+  }
+}
+deepCopy(o, obj)
+```
+
+需要注意的是，我们在写这个函数时，需要先考虑数组的情况，再考虑对象的情况，不能颠倒。这是因为在 JavaScript 中，数组也是对象的一种特殊形式，因此我们需要先处理数组的拷贝逻辑，确保能够正确地拷贝包含数组的对象。否则如果先把数组当成了对象，那么就没法正确拷贝数组了。
+
+另外两种办法分别是使用lodash库的`cloneDeep()`方法，以及`JSON.parse(JSON.stringify(obj))`，使用JSON转换是最简单的深拷贝方式。
