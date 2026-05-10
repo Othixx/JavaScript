@@ -1,27 +1,9 @@
-// 防抖
-// 名字叫做debounce，延迟时间为delay，调用函数为fn
-function debounce(fn, delay) {
-  let t = null
-  return function () {
-    if (t !== null) {
-      clearTimeout(t)
-    }
-    t = setTimeout(() => {
-      fn.call(this)
-    }, delay)
-  }
-}
+console.log('代码1：会执行') // ✅ 执行成功
+console.log('代码2：会执行') // ✅ 执行成功
 
-// 节流
-// 名字叫做throttle，延迟时间和函数仍旧为delay和fn
-function throttle(fn, delay) {
-  let t = null
-  return function () {
-    if (t === null) {
-      t = setTimeout(() => {
-        fn.call(this)
-        t = null
-      }, delay)
-    }
-  }
-}
+const obj = null
+obj.method() // ❌ 运行时错误：Cannot read properties of null
+
+console.log('代码3：不会执行') // ❌ 因为上面出错了，停止执行
+
+// 结果：前两行会输出，然后报错，第三行不会执行

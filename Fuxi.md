@@ -577,3 +577,51 @@ cat.breed = '狸花猫' // 无法被监听到
 ![alt text](image-435.png)
 
 上图就是非常简化的原理。有同学说我上面不是还是有递归吗，实则不然，只有我在访问那个属性的时候才会触发递归，而不是像Vue2那样，初始化的时候就会递归遍历所有属性，大大提高了效率。
+
+# 2026.5.10
+
+在ES6的export和import中，我们要知道一些概念：默认导出/导入、命名导出/导入，按需导入等。这一部分内容感觉就是需要多写，就自动就会了。
+
+另外要注意三点：
+
+- ES6 模块是严格模式：默认 use strict，变量必须声明，不能全局泄露。
+- 导入导出是「只读引用」：导入的变量不能直接修改，是值的映射。
+- 浏览器使用必须加 type="module"
+
+```javascript
+<script type="module" src="main.js"></script>
+```
+
+如果是`Node.js`环境，那么要在`package.json`中添加`type: "module"`，否则会报错。
+
+对于ES6 Module（ESM）和CommonJS（CJS）的区别，我们要知道，面试的时候可能会经常问：
+
+CommonJS：Node 早期默认，ES6 Module：JS ES6 官方标准。
+
+CommonJS的写法是，使用`require`来导入模块，使用`module.exports`来导出模块。这种写法也决定了它和ESM的一大区别是：**CommonJS只有在运行到`require`时才会才会导入模块，而ESM是在编译时最初时就会导入模块**，这也使得执行效率提升。
+
+第二大区别：值的特点：拷贝 vs 引用
+
+CommonJS：值拷贝（浅复制）
+
+导入后和原模块互不影响，原模块变了，导入的值不会跟着变。
+
+ES6 Module：动态只读引用
+
+导入的是原变量的地址映射，原模块值变了，导入的值自动同步更新。
+
+第三大区别，能否动态条件引入：
+
+![alt text](image-436.png)
+
+第四大区别，是否开启严格模式：
+
+![alt text](image-437.png)
+
+localStorage/sessionStorage/cookie的区别和使用场景，这个问题我们要知道localStorage是持久化的存储，sessionStorage是会话级别的存储，关闭网页之后数据就会消失，cookie是请求头中的存储。前两者大概都能存5MB，后一个比较小，大概是4KB。
+
+localStorage：适合存储用户信息、主题设置等持久化的数据。
+
+sessionStorage：适合存储临时表单数据，防止刷新丢失，存页面间传递的临时数据。
+
+cookie：适合存储用户登录状态、以及需要随请求发送的少量数据。
