@@ -1046,3 +1046,148 @@ transform位移 → **既不回流也不重绘（合成）**
 1. 批量修改DOM，不要频繁单个改样式
 2. 样式修改统一写class，不要频繁style逐个赋值
 3. 频繁动画优先用`transform、opacity`，避开top/left/width
+
+# 2026.6.9
+
+## CORS跨域请求头解析
+
+CORS，全称为“跨域资源共享”（Cross-Origin Resource Sharing），是一种机制，它使用额外的 HTTP 头来告诉浏览器允许一个网页从另一个域（不同于该网页所在的域）请求资源。这样可以在服务器和客户端之间进行安全的跨域通信。
+
+当一个网页向不同源发出请求时，CORS 会通过以下几个步骤来处理：
+
+- 预检请求（Preflight Request）：对于某些类型的请求（如使用 HTTP 方法 PUT、DELETE，或者请求带有非简单头部），浏览器会首先发送一个 OPTIONS 请求，这个请求称为“预检请求”。服务器收到这个请求后，会返回一个响应头部，指明实际请求是否被允许。
+
+- 实际请求（Actual Request）：如果预检请求通过，浏览器会继续发送实际的请求。
+
+- 响应头部（Response Headers）：服务器在响应中会包含一些特定的 CORS 头部，如 Access-Control-Allow-Origin，以指示哪些域名可以访问资源。
+
+CORS 通过在 HTTP(s) 请求和响应中使用特定的头部字段来实现跨域资源共享，具体来说，CORS 分为两种类型的请求处理方式：**简单请求和预检请求**。
+
+- 简单请求：对于某些简单的 HTTP 请求（如GET、POST请求且不包含自定义头部），浏览器会直接发送请求，并在响应中检查 CORS 头部。
+
+- 预检请求：对于复杂类型的请求（如使用PUT、DELETE方法，或包含自定义头部），浏览器会首先发送一个OPTIONS请求，称为预检请求（Preflight Request），以确定服务器是否允许实际请求。
+
+**简单请求**
+
+简单请求是指满足以下条件的 HTTP 请求：
+
+- 使用GET、POST、HEAD方法
+
+- 请求头部仅包含以下字段：Accept、Accept-Language、Content-Language、Content-Type（且值为application/x-www-form-urlencoded、multipart/form-data或text/plain）
+
+对于简单请求，浏览器会直接发送请求并在响应中检查以下 CORS 头部：
+
+- Access-Control-Allow-Origin：指示允许访问资源的源。
+
+- Access-Control-Allow-Credentials：指示是否允许发送凭据（如Cookies）。
+
+- Access-Control-Expose-Headers：指示哪些头部可以作为响应的一部分被访问。
+
+比如，下面一个示例：
+
+客户端请求：
+
+```
+GET /api/data HTTP/1.1   Host: www.yuanjava.com   Origin: https://yuanjava.com
+```
+
+服务器响应：
+
+```
+HTTP/1.1 200 OK   Access-Control-Allow-Origin: https://yuanjava.com   Content-Type: application/json      {"message": "Hello, CORS!"}
+```
+
+**预检请求**
+
+对于复杂请求，浏览器会首先发送一个 OPTIONS 请求，包含以下头部字段：
+
+- Origin：指示请求的源。
+
+- Access-Control-Request-Method：指示实际请求将使用的方法。
+
+- Access-Control-Request-Headers：指示实际请求将包含的自定义头部。
+
+服务器收到预检请求后，会返回一个响应，包含以下头部字段以指示是否允许请求：
+
+- Access-Control-Allow-Origin：表明允许访问资源的源，可以是具体的源或通配符 \*；
+
+- Access-Control-Allow-Methods：表明允许的方法，如 GET, POST, PUT, DELETE；
+
+- Access-Control-Allow-Headers：表明允许的自定义头部；
+
+- Access-Control-Allow-Credentials：表明是否允许发送凭据（如 Cookies）；
+
+- Access-Control-Expose-Headers：表明哪些头部可以作为响应的一部分被访问；
+
+- Access-Control-Max-Age：表明预检请求的结果可以被缓存的时间，单位是秒；
+
+如果预检请求通过，浏览器会继续发送实际请求。
+
+比如，下面一个示例：
+
+预检请求：
+
+```
+OPTIONS /api/data HTTP/1.1   Host: api.yuanjava.com   Origin: https://yuanjava.com   Access-Control-Request-Method: PUT   Access-Control-Request-Headers: Content-Type
+```
+
+预检响应：
+
+```
+HTTP/1.1 204 No Content   Access-Control-Allow-Origin: https://yuanjava.com   Access-Control-Allow-Methods: GET, POST, PUT   Access-Control-Allow-Headers: Content-Type   Access-Control-Allow-Credentials: true   Access-Control-Max-Age: 3600
+```
+
+实际请求：
+
+```
+PUT /api/data HTTP/1.1   Host: api.yuanjava.com   Origin: https://yuanjava.com   Content-Type: application/json      {"data": "example"}
+```
+
+实际响应：
+
+```
+HTTP/1.1 200 OK   Access-Control-Allow-Origin: https://yuanjava.com   Content-Type: application/json      {"message": "Data updated"}
+```
+
+## JSONP和代理跨域
+
+有的时候，浏览器或者服务端不支持跨域请求，但是我们仍旧需要跨域，这个时候就需要使用JSONP或者代理跨域来实现。
+
+### 一、JSONP 适用场景（极窄、过时）
+
+JSONP：利用script标签的src属性不受同源策略限制的特点，通过script标签引入一个js文件，这个js文件载入成功后会执行我们在url参数中指定的函数，并且会把我们需要的json数据作为参数传入。
+
+#### 适用
+
+1. **请求第三方老接口**（对方只提供 JSONP，不支持 CORS）
+2. **只需要 GET 请求**（JSONP 本质 script 标签，不支持 POST/PUT/DELETE）
+3. **兼容极老浏览器**（IE8 以下，完全不支持 CORS）
+
+#### 不适用
+
+- 自己的后端接口（**应该用 CORS，不要用 JSONP**）
+- 需要 POST / 提交数据
+- 有安全风险（信任第三方脚本，容易 XSS）
+
+### 二、代理跨域 适用场景（最常用）
+
+#### 适用
+
+1. **本地开发跨域**（webpack/vite 代理，90% 前端都在用）
+2. **后端不方便开 CORS**
+3. **隐藏真实接口地址**（前端只请求 `/api`，不暴露后端域名）
+4. **生产环境反向代理**（Nginx 代理后端服务）
+5. **跨域请求需要携带 Cookie**（代理是同域，浏览器允许带凭证）
+
+#### 不适用
+
+- 直接请求**第三方公开接口**（对方允许 CORS 就直接用）
+
+#### 特点
+
+- 支持所有请求：GET/POST/PUT/DELETE
+- 安全、无限制
+- **前端开发标准方案**
+- 本质：**浏览器 → 代理服务器 → 目标接口**（浏览器认为是同域）
+
+另外简单补充一下，这个代理是哪里来的，是在你启动 Vite/Webpack 项目时，本地同时跑了一个小型服务（端口比如 5173），这个服务就是开发代理。
